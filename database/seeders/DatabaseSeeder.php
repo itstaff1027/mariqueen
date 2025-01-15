@@ -31,20 +31,20 @@ class DatabaseSeeder extends Seeder
             'manage users',
         ];
 
-        // foreach ($permissions as $permission) {
-        //     Permission::create(['name' => $permission]);
-        // }
+        foreach ($permissions as $permission) {
+            Permission::create(['name' => $permission]);
+        }
 
         // Create roles and assign permissions
         $adminRole = Role::create(['name' => 'admin']);
         $adminRole->givePermissionTo($permissions);
 
         // Create a user and assign the role
-        // $adminUser = User::create([
-        //     'name' => 'Admin User',
-        //     'email' => 'admin@example.com',
-        //     'password' => bcrypt('password123'),  // Ensure this is hashed correctly
-        // ]);
+        $adminUser = User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password123'),  // Ensure this is hashed correctly
+        ]);
 
         $adminUser = User::findOrFail(1);
 
