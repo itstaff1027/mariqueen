@@ -30,11 +30,16 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/settings_colors', ColorController::class);
-    // Route::resource('/settings_categories', CategoryController::class);
-    // Route::resource('/settings_heel-heights', HeelHeightController::class);
+    Route::resource('/settings_categories', CategoryController::class);
+    Route::resource('/settings_heel-heights', HeelHeightController::class);
     // Route::resource('/settings_order-types', OrderTypeController::class);
     Route::resource('/settings_sizes', SizeController::class);
     Route::resource('/settings_size_values', SizeValueController::class);
+
 });
+
+Route::get('/settings', function () {
+    return Inertia::render('Settings/Page');
+})->middleware(['auth', 'role:admin'])->name('settings');
 
 require __DIR__.'/auth.php';

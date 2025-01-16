@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\GlobalSettings;
 
-use App\Http\Controllers\Controller;
+use App\Models\HeelHeight;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class HeelHeightController extends Controller
 {
@@ -12,7 +13,11 @@ class HeelHeightController extends Controller
      */
     public function index()
     {
-        //
+        $heel_heights = HeelHeight::all();
+        // dd($heel_height);
+        return inertia('Settings/HeelHeights/Page', [
+            'heel_heights' => $heel_heights
+        ]);
     }
 
     /**
@@ -20,7 +25,10 @@ class HeelHeightController extends Controller
      */
     public function create()
     {
-        //
+        // $HeelHeight = HeelHeight::all();
+        return inertia('Settings/HeelHeights/Create/Page', [
+            // 'HeelHeights' => $HeelHeight
+        ]);
     }
 
     /**
@@ -28,7 +36,18 @@ class HeelHeightController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'value' => 'required|string|max:255'
+        ]);
+
+        HeelHeight::create([
+            'name' => $request->name,
+            'value' => $request->value
+        ]);
+
+        return redirect()->route('settings_heel-heights.index')->with('success', 'Heel Heights created successfully!');
     }
 
     /**
@@ -44,7 +63,10 @@ class HeelHeightController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $heel_height = HeelHeight::findOrFail($id);
+        return inertia('Settings/HeelHeights/Edit/Page', [
+            'heel_height' => $heel_height
+        ]);
     }
 
     /**
@@ -52,7 +74,19 @@ class HeelHeightController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // dd($request);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'value' => 'required|string|max:255',
+        ]);
+
+        $heel_height = HeelHeight::findOrFail($id);
+        $heel_height->update([
+            'name' => $request->name,
+            'value' => $request->value
+        ]);
+
+        return redirect()->route('settings_heel-heights.index')->with('success', 'Heel Heights Updated successfully!');
     }
 
     /**
@@ -60,6 +94,9 @@ class HeelHeightController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $heel_height = HeelHeight::findOrFail($id);
+        $heel_height->delete();
+
+        return redirect()->route('settings_heel-heights.index')->with('success', 'Heel Heights Deleted successfully!');
     }
 }

@@ -12,7 +12,8 @@ export default function AuthenticatedLayout({ header, children }) {
         { 'id': '0', 'name': 'Dashboard', 'collapsed_name': 'D', 'route': 'dashboard' },
         { 'id': '1', 'name': 'Admin Users', 'collapsed_name': 'AU', 'route': 'admin-users.index' },
         { 'id': '2', 'name': 'Admin Permissions', 'collapsed_name': 'APE', 'route': 'admin-permissions.index' },
-        { 'id': '2', 'name': 'Admin Panel', 'collapsed_name': 'AP', 'route': 'admin-panel.index' },
+        { 'id': '3', 'name': 'Admin Panel', 'collapsed_name': 'AP', 'route': 'admin-panel.index' },
+        { 'id': '4', 'name': 'Settings', 'collapsed_name': 'S', 'route': 'settings' },
         // { 'id': '3', 'name': 'Products', 'route': 'products' },
         // { 'id': '4', 'name': 'Tools', 'route': 'tools' },
     ];

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\GlobalSettings;
 
-use App\Http\Controllers\Controller;
+use App\Models\Categories;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
@@ -12,7 +13,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Categories::all();
+        return inertia('Settings/Categories/Page', [
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -20,7 +24,10 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        // $categories = Categories::all();
+        return inertia('Settings/Categories/Create/Page', [
+            // 'categories' => $categories
+        ]);
     }
 
     /**
@@ -28,7 +35,18 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255'
+        ]);
+
+        Categories::create([
+            'category_name' => $request->name,
+            'category_label' => $request->label
+        ]);
+
+        return redirect()->route('settings_categories.index')->with('success', 'Categoriess created successfully!');
     }
 
     /**
@@ -44,7 +62,10 @@ class CategoryController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $categories = Categories::findOrFail($id);
+        return inertia('Settings/Categories/Edit/Page', [
+            'category' => $categories
+        ]);
     }
 
     /**
@@ -52,7 +73,19 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // dd($request);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
+        ]);
+
+        $categories = Categories::findOrFail($id);
+        $categories->update([
+            'category_name' => $request->name,
+            'category_label' => $request->label
+        ]);
+
+        return redirect()->route('settings_categories.index')->with('success', 'Categoriess Updated successfully!');
     }
 
     /**
@@ -60,6 +93,9 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $categories = Categories::findOrFail($id);
+        $categories->delete();
+
+        return redirect()->route('settings_categories.index')->with('success', 'Categoriess Deleted successfully!');
     }
 }
