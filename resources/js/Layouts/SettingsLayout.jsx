@@ -64,16 +64,13 @@ export default function SettingsLayout({ header, children }) {
                         <div className="p-6 text-gray-900">
                             <div className="flex w-full p-4 justify-between">
                                 {paths.map((path, i) => (
-                                    <div>
-                                        <ResponsiveNavLink 
-                                            subNavLinks={true} 
-                                            href={route(`${path.route}`)}
-                                            active={route().current(`${path.route}`)}
-                                        >
-                                            {path.name}
-                                        </ResponsiveNavLink>
-                                    </div>
-                                    
+                                    <ResponsiveNavLink 
+                                        href={route(`${path.route}`)}
+                                        active={route().current(`${path.route}`)}
+                                        key={i}
+                                    >
+                                        {path.name}
+                                    </ResponsiveNavLink>
                                 ))}
                             </div>
                             {/* {header && (

@@ -7,18 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Color extends Model
+class ProductVariant extends Model
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
-        'color_name',
-        'hex'
+        'product_id',
+        'color_id',
+        'heel_height_id',
+        'size_value_id',
+        'sku'
     ];
 
-    public function products()
-    {
-        return $this->belongsToMany(Product::class);
-    }
 }

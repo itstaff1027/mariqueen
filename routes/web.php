@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Inventory\ProductsController;
+use App\Http\Controllers\Inventory\WarehouseController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -36,6 +38,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/settings_sizes', SizeController::class);
     Route::resource('/settings_size_values', SizeValueController::class);
 
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('/inventory/products', ProductsController::class);
+    Route::post('/inventory/products/variants', [ProductsController::class, 'store_variants']);
+    Route::resource('/inventory/warehouses', WarehouseController::class);
 });
 
 Route::get('/settings', function () {
