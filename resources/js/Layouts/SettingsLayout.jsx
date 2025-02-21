@@ -62,12 +62,13 @@ export default function SettingsLayout({ header, children }) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <div className="flex w-full p-4 justify-between">
+                            <div className="flex flex-wrap gap-3 justify-center sm:justify-start p-4">
                                 {paths.map((path, i) => (
                                     <ResponsiveNavLink 
                                         href={route(`${path.route}`)}
                                         active={route().current(`${path.route}`)}
                                         key={i}
+                                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition"
                                     >
                                         {path.name}
                                     </ResponsiveNavLink>

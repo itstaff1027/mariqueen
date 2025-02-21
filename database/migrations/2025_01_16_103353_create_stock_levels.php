@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
         });
         
-                // Create stock_levels table
+        // Create stock_levels table
         Schema::create('stock_levels', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_variant_id');
@@ -44,11 +44,13 @@ return new class extends Migration
         // // Create stock_movements table
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('cascade'); // Corrected this line
-            $table->integer('quantity');
-            $table->enum('movement_type', ['purchase', 'sale', 'transfer', 'return']);
+            $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('cascade');
             $table->foreignId('from_warehouse_id')->nullable()->constrained('warehouses')->onDelete('set null');
             $table->foreignId('to_warehouse_id')->nullable()->constrained('warehouses')->onDelete('set null');
+            $table->enum('movement_type', ['purchase', 'sale', 'transfer_in', 'transfer_out', 'return', 'adjustment', 'correction', 'repair']);
+            $table->integer('quantity');
+            // $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('set null'); // Optional for tracking orders
+            $table->longText('remarks')->nullable(); // Use longText for lengthy remarks
             $table->timestamps();
         });
     }
