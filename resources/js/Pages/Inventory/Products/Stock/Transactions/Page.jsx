@@ -1,14 +1,15 @@
-import React, {useEffect} from 'react';
-import { Link, router } from '@inertiajs/react';
+import React, { useEffect } from 'react';
+import { Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-const StockTransactionList = ({ stock_transactions }) => {
+const StockTransactionList = ({ stock_transactions, warehouses }) => {
     
     useEffect(() => {
-        console.log(stock_transactions)
-    }, [])
+        console.log(stock_transactions);
+        console.log(warehouses);
+    }, []);
 
-    return(
+    return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
@@ -22,7 +23,7 @@ const StockTransactionList = ({ stock_transactions }) => {
                         <div className="p-6">
                             <div className="container mx-auto p-6">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h1 className="text-2xl font-bold">Transaction</h1>
+                                    <h1 className="text-2xl font-bold">Stock Transactions</h1>
                                     <div className="space-x-2">
                                         <Link
                                             href="/inventory/stock/transactions/create"
@@ -30,14 +31,13 @@ const StockTransactionList = ({ stock_transactions }) => {
                                         >
                                             Create
                                         </Link>
-                                        <Link
+                                        {/* <Link
                                             href="/inventory/stocks/transaction/transfer"
                                             className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
                                         >
                                             Transfer
-                                        </Link>
+                                        </Link> */}
                                     </div>
-                                    
                                 </div>
                                 <table className="w-full table-auto border-collapse border text-center border-gray-300">
                                     <thead>
@@ -52,37 +52,30 @@ const StockTransactionList = ({ stock_transactions }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {stock_transactions.map((transaction) => (
-                                        <tr key={transaction.id}>
-                                            <td className="border border-gray-300 px-4 py-2">{transaction.id}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{transaction.from_warehouse_name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{transaction.to_warehouse_name}</td>
-                                            <th className="border border-gray-300 px-4 py-2">{transaction.transaction_type}</th>
-                                            <th className="border border-gray-300 px-4 py-2">{transaction.status}</th>
-                                            <td className="border border-gray-300 px-4 py-2">{transaction.created_at}</td>
-                                            <td className="border border-gray-300 px-6 py-3 space-x-2">
-                                                <Link
-                                                    href={`/inventory/stock/transaction/${transaction.id}`}
-                                                    className="text-orange-500 hover:underline"
-                                                >
-                                                    View
-                                                </Link>
-                                                {/* <Link
-                                                    href={`/inventory/stock_transactions/${transaction.id}/edit`}
-                                                    className="text-blue-500 hover:underline"
-                                                >
-                                                    Edit
-                                                </Link> */}
-                                                {/* <button
-                                                    type="button"
-                                                    onClick={(e) => destroy(e, transaction.id)}
-                                                    className="text-red-600 hover:text-red-700 transition-colors"
-                                                >
-                                                    Delete
-                                                </button> */}
-                                            </td>
-                                        </tr>
-                                        ))}
+                                        {stock_transactions.map((transaction) => {
+                                            // ✅ Get warehouse names safely
+                                            const fromWarehouse = warehouses.find(w => w.id === transaction.from_warehouse_id)?.name || "N/A";
+                                            const toWarehouse = warehouses.find(w => w.id === transaction.to_warehouse_id)?.name || "N/A";
+
+                                            return (
+                                                <tr key={transaction.id}>
+                                                    <td className="border border-gray-300 px-4 py-2">{transaction.id}</td>
+                                                    <td className="border border-gray-300 px-4 py-2">{fromWarehouse}</td>
+                                                    <td className="border border-gray-300 px-4 py-2">{toWarehouse}</td>
+                                                    <td className="border border-gray-300 px-4 py-2">{transaction.transaction_type}</td>
+                                                    <td className="border border-gray-300 px-4 py-2">{transaction.status}</td>
+                                                    <td className="border border-gray-300 px-4 py-2">{new Date(transaction.created_at).toLocaleString()}</td>
+                                                    <td className="border border-gray-300 px-6 py-3 space-x-2">
+                                                        <Link
+                                                            href={`/inventory/stock/transactions/${transaction.id}`}
+                                                            className="text-orange-500 hover:underline"
+                                                        >
+                                                            View
+                                                        </Link>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
@@ -91,7 +84,7 @@ const StockTransactionList = ({ stock_transactions }) => {
                 </div>
             </div>
         </AuthenticatedLayout>
-    )
+    );
 };
 
 export default StockTransactionList;

@@ -53,7 +53,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Route::post('/inventory/product/gallery_image/delete', [ProductsController::class, 'destroy_gallery_image']);
 
     Route::resource('/inventory/stocks', StockLevelController::class);
+
     Route::resource('/inventory/stock/transactions', StockTransactionController::class);
+    Route::post('/inventory/stock/transactions/pending/{id}', [StockTransactionController::class, 'update_status_to_pending'])->name('to_pending');
+    Route::post('/inventory/stock/transactions/approve/{id}', [StockTransactionController::class, 'update_status_to_approved'])->name('test');
+    Route::post('/inventory/stock/transactions/reject/{id}', [StockTransactionController::class, 'update_status_to_rejected'])->name('to_rejected');
     
     Route::get('/inventory/stock/transfer', [StockLevelController::class, 'transfer_stocks']);
     Route::post('/inventory/store/stock/transfer', [StockLevelController::class, 'store_transferStock']);

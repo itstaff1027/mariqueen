@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\StockTransactionItems;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -24,5 +25,13 @@ class StockTransactions extends Model
     public function logs()
     {
         return $this->hasMany(StockTransactionLogs::class);
+    }
+
+    public function productVariant(){
+        return $this->belongsToMany(ProductVariant::class, 'stock_transaction_items', 'stock_transaction_id');
+    }
+
+    public function items(){
+        return $this->hasMany(StockTransactionItems::class, 'stock_transaction_id');
     }
 }

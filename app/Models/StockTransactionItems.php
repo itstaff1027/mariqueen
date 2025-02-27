@@ -17,4 +17,13 @@ class StockTransactionItems extends Model
             'product_variant_id',
             'quantity',
         ];
+
+    public function availableStocks(){
+        return $this->hasMany(ProductVariant::class, 'id');
+    }
+
+    public function productVariant(){
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+    
 }
