@@ -16,6 +16,7 @@ use App\Http\Controllers\GlobalSettings\CategoryController;
 use App\Http\Controllers\GlobalSettings\OrderTypeController;
 use App\Http\Controllers\GlobalSettings\SizeValueController;
 use App\Http\Controllers\GlobalSettings\HeelHeightController;
+use App\Http\Controllers\Inventory\AssignUserToWarehouseController;
 use App\Http\Controllers\Inventory\StockTransactionController;
 
 Route::get('/', function () {
@@ -63,6 +64,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/inventory/store/stock/transfer', [StockLevelController::class, 'store_transferStock']);
     
     Route::resource('/inventory/warehouses', WarehouseController::class);
+    Route::resource('/inventory/warehouses/assign_warehouse', AssignUserToWarehouseController::class);
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function (){
