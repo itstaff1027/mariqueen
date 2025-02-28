@@ -72,6 +72,9 @@ Route::middleware(['auth', 'role:admin'])->group(function (){
     Route::get('/inventory', function () {
         return Inertia:: render('Inventory/Page');
     })->name('inventory');
+    Route::get('/sales', function () {
+        return Inertia:: render('Sales/Page');
+    })->name('sales');
 });
 
 require __DIR__.'/auth.php';

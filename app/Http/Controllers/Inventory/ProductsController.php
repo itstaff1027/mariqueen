@@ -164,7 +164,6 @@ class ProductsController extends Controller
     
 
     public function store_variants(Request $request){
-        // dd($request);
         ProductVariant::insert($request->product_variants);
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully!');

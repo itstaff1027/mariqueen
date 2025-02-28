@@ -12,7 +12,7 @@ import Categories from '@/Components/Categories';
 const CreateProduct = ({ colors, sizes, heel_heights, categories }) => {
   const { data, setData, post, errors, reset } = useForm({
     product_name: '',
-    status: '',
+    status: 'inactive',
     cost: 0,
     srp: 0,
     colors: [],
@@ -55,7 +55,7 @@ const CreateProduct = ({ colors, sizes, heel_heights, categories }) => {
                                         <InputError message={errors.product_name} />
                                     </div>
                                     <div className="mb-4">
-                                        <InputLabel for="status" value="Status" />
+                                        {/* <InputLabel for="status" value="Status" /> */}
                                         <TextInput
                                             type="text"
                                             id="status"
@@ -63,11 +63,12 @@ const CreateProduct = ({ colors, sizes, heel_heights, categories }) => {
                                             value={data.status}
                                             onChange={(e) => setData('status', e.target.value)}
                                             className="w-full border px-4 py-2"
+                                            hidden
                                         />
                                         <InputError message={errors.status} />
                                     </div>
                                     <div className="mb-4">
-                                        <InputLabel for="cost" value="Cost" />
+                                        {/* <InputLabel for="cost" value="Cost" hidden /> */}
                                         <TextInput
                                             type="number"
                                             id="cost"
@@ -75,8 +76,9 @@ const CreateProduct = ({ colors, sizes, heel_heights, categories }) => {
                                             value={data.cost}
                                             onChange={(e) => setData('cost', e.target.value)}
                                             className="w-full border px-4 py-2"
+                                            hidden
                                         />
-                                        <InputError message={errors.status} />
+                                        <InputError message={errors.cost} />
                                     </div>
                                     <div className="mb-4">
                                         <InputLabel for="srp" value="SRP" />

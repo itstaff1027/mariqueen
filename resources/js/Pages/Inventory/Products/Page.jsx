@@ -38,9 +38,9 @@ const ProductList = ({ products }) => {
                                     <thead>
                                         <tr className="bg-gray-100">
                                         <th className="border border-gray-300 px-4 py-2">Name</th>
-                                        <th className="border border-gray-300 px-4 py-2">Cost</th>
+                                        {/* <th className="border border-gray-300 px-4 py-2">Status</th> */}
+                                        {/* <th className="border border-gray-300 px-4 py-2">Cost</th> */}
                                         <th className="border border-gray-300 px-4 py-2">SRP</th>
-                                        <th className="border border-gray-300 px-4 py-2">Status</th>
                                         <th className="border border-gray-300 px-4 py-2">Actions</th>
                                         </tr>
                                     </thead>
@@ -48,8 +48,8 @@ const ProductList = ({ products }) => {
                                         {products.map((product) => (
                                         <tr key={product.id}>
                                             <td className="border border-gray-300 px-4 py-2">{product.product_name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{product.status}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{product.cost}</td>
+                                            {/* <td className="border border-gray-300 px-4 py-2">{product.status}</td> */}
+                                            {/* <td className="border border-gray-300 px-4 py-2">{product.cost}</td> */}
                                             <td className="border border-gray-300 px-4 py-2">{product.srp}</td>
                                             <td className="border border-gray-300 px-6 py-3 space-x-2">
                                                 <Link

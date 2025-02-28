@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->decimal('shipping_cost', 10, 2)->nullable(); // Shipping fee (fixed or user input)
             $table->decimal('rush_order_fee', 10, 2)->nullable(); // Additional cost for rush orders
             $table->string('tracking_number')->nullable(); // Tracking number for shipped orders
-            $table->enum('status', ['pending', 'preparing', 'on-hold', 'shipped', 'delivered', 'cancelled', 'rejected', 'return', 'replacement', 'refund'])->default('pending');
+            $table->enum('status', ['pending', 'paid', 'preparing', 'on-hold', 'shipped', 'delivered', 'cancelled', 'rejected', 'return', 'replacement', 'refund'])->default('pending');
             $table->decimal('total_amount', 10, 2);
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Cashier processing the order
             $table->timestamps();

@@ -30,8 +30,8 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
     //     variants, // Includes all the updated variants with SKUs
     // };
 
-    console.log(variants);
-    console.log(data);
+    // console.log(variants);
+    // console.log(data);
 
     post('/inventory/products/variants');
 };
@@ -61,6 +61,8 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                 size_value_id: sizeValue.id,
                                 category_id: product.categories[0].id,
                                 sku: '', // Initialize SKU
+                                unit_price: 0,
+                                cost: 0
                             });
                         }
                     });
@@ -77,8 +79,8 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
 
 
   useEffect(() => {
-    console.log(product);
-    console.log(size_values);
+    // console.log(product);
+    // console.log(size_values);
   }, []);
 
   return (
@@ -96,140 +98,70 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                             <div className="container mx-auto p-6">
                                 <h1 className="text-2xl font-bold mb-4">View Product</h1>
                                 <div>
-                                    <div className="mb-4">
-                                        <InputLabel for="name" value="Product Name" />
-                                        <TextInput
-                                            type="text"
-                                            id="name"
-                                            name="name"
-                                            value={data.product_name}
-                                            onChange={(e) => setData('product_name', e.target.value)}
-                                            className="w-full border px-4 py-2"
-                                            disabled
-                                        />
-                                        <InputError message={errors.product_name} />
-                                    </div>
-                                    <div className="mb-4">
-                                        <InputLabel for="status" value="Status" />
-                                        <TextInput
-                                            type="text"
-                                            id="status"
-                                            name="status"
-                                            value={data.status}
-                                            onChange={(e) => setData('status', e.target.value)}
-                                            className="w-full border px-4 py-2"
-                                            disabled
-                                        />
-                                        <InputError message={errors.status} />
-                                    </div>
-                                    <div className="mb-4">
-                                        <InputLabel for="cost" value="Cost" />
-                                        <TextInput
-                                            type="number"
-                                            id="cost"
-                                            name="cost"
-                                            value={data.cost}
-                                            onChange={(e) => setData('cost', e.target.value)}
-                                            className="w-full border px-4 py-2"
-                                            disabled
-                                        />
-                                        <InputError message={errors.status} />
-                                    </div>
-                                    <div className="mb-4">
-                                        <InputLabel for="srp" value="SRP" />
-                                        <TextInput
-                                            type="number"
-                                            id="srp"
-                                            name="srp"
-                                            value={data.srp}
-                                            onChange={(e) => setData('srp', e.target.value)}
-                                            className="w-full border px-4 py-2"
-                                            disabled
-                                        />
-                                        <InputError message={errors.srp} />
-                                    </div>
-                                    <div className="mb-4">
-                                        <InputLabel for="colors" value="Colors" />
-                                        <Colors.Selection
-                                            handleSelectedColor={(selectedColor, isRemoving = false) => {
-                                                if (isRemoving) {
-                                                    // Remove the color by ID
-                                                    setData('colors', data.colors.filter(color => color.id !== selectedColor.id)); // Remove the color by ID
-                                                } else {
-                                                    // Check if the color is already in the list before adding it
-                                                    if (!data.colors.some(color => color.id === selectedColor.id)) {
-                                                    // Add the selected color
-                                                    setData('colors', [...data.colors, selectedColor]);
-                                                    }
-                                                }
-                                            }} 
-                                            colors={data.colors} 
-                                            availableColors={colors}
-                                        />
-                                        <InputError message={errors.colors} />
-                                    </div>
+                                    <div className="w-full p-6 bg-white shadow-md rounded-lg">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Product Name & Status */}
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Product Name</h2>
+                                                <p className="text-xl font-bold text-gray-900">{data.product_name}</p>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Status</h2>
+                                                <p className={`text-lg font-semibold ${data.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>{data.status}</p>
+                                            </div>
 
-                                    <div className="mb-4">
-                                        <InputLabel for="sizes" value="Sizes" />
-                                        <Sizes.Selection
-                                            handleSelectedSizes={(selectedSize, isRemoving = false) => {
-                                                if (isRemoving) {
-                                                    // Remove the color by ID
-                                                    setData('sizes', data.sizes.filter(size => size.id !== selectedSize.id)); // Remove the Size by ID
-                                                } else {
-                                                    // Check if the Size is already in the list before adding it
-                                                    if (!data.sizes.some(size => size.id === selectedSize.id)) {
-                                                    // Add the selected Size
-                                                    setData('sizes', [...data.sizes, selectedSize]);
-                                                    }
-                                                }
-                                            }} 
-                                            sizes={data.sizes} 
-                                            availableSizes={sizes}
-                                        />
-                                        <InputError message={errors.sizes} />
-                                    </div>
+                                            <hr className="col-span-2" />
 
-                                    <div className="mb-4">
-                                        <InputLabel for="heel_height" value="Heel Heights" />
-                                        <HeelHeights.Selection
-                                            handleSelectedHeelHeights={(selectedHeelHeight, isRemoving = false) => {
-                                                if (isRemoving) {
-                                                    // Remove the color by ID
-                                                    setData('heel_heights', data.heel_heights.filter(HeelHeight => HeelHeight.id !== selectedHeelHeight.id)); // Remove the HeelHeight by ID
-                                                } else {
-                                                    // Check if the HeelHeight is already in the list before adding it
-                                                    if (!data.heel_heights.some(HeelHeight => HeelHeight.id === selectedHeelHeight.id)) {
-                                                    // Add the selected HeelHeight
-                                                    setData('heel_heights', [...data.heel_heights, selectedHeelHeight]);
-                                                    }
-                                                }
-                                            }} 
-                                            heelHeights={data.heel_heights} 
-                                            availableHeelHeights={heel_heights}
-                                        />
-                                        <InputError message={errors.HeelHeights} />
-                                    </div>
+                                            {/* Cost & SRP */}
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Cost</h2>
+                                                <p className="text-lg font-bold text-gray-900">₱{data.cost}</p>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">SRP</h2>
+                                                <p className="text-lg font-bold text-gray-900">₱{data.srp}</p>
+                                            </div>
 
-                                    <div className="mb-4">
-                                        <InputLabel for="categories" value="Category" />
-                                        <Categories.Selection
-                                            handleSelectedCategories={(selectedCategories, isRemoving = false) => {
-                                                if (isRemoving) {
-                                                    // Remove the color by ID
-                                                    setData('categories', data.categories.filter(categories => categories.id !== selectedCategories.id)); // Remove the categories by ID
-                                                } else {
-                                                    // Check if the categories is already in the list before adding it
-                                                    if (!data.categories.some(categories => categories.id === selectedCategories.id)) {
-                                                    // Add the selected HeelHeight
-                                                    setData('categories', [...data.categories, selectedCategories]);
-                                                    }
-                                                }
-                                            }} 
-                                            categories={data.categories} 
-                                            availableCategories={categories}
-                                        />
-                                        <InputError message={errors.categories} />
+                                            <hr className="col-span-2" />
+
+                                            {/* Colors & Sizes */}
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Colors</h2>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {data.colors.map((color) => (
+                                                        <span key={color.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">{color.color_name}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Sizes</h2>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {data.sizes.map((size) => (
+                                                        <span key={size.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">{size.size_name}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <hr className="col-span-2" />
+
+                                            {/* Heel Heights & Categories */}
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Heel Heights</h2>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {data.heel_heights.map((heel) => (
+                                                        <span key={heel.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">{heel.value}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-lg font-semibold text-gray-700">Category</h2>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {data.categories.map((category) => (
+                                                        <span key={category.id} className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md">{category.category_name}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Repeat similar fields for HeelHeights, Heel Heights, Categories */}
@@ -250,6 +182,8 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                                         <th className="px-4 py-3 font-medium">Heel Height</th>
                                                         <th className="px-4 py-3 font-medium">Size Value</th>
                                                         <th className="px-4 py-3 font-medium">SKU</th>
+                                                        <th className="px-4 py-3 font-medium">SRP</th>
+                                                        <th className="px-4 py-3 font-medium">COST</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">
@@ -272,6 +206,32 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                                                             setVariants(updatedVariants);
                                                                         }}
                                                                         placeholder="Enter SKU"
+                                                                        className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-4 py-2">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={variant.unit_price}
+                                                                        onChange={(e) => {
+                                                                            const updatedVariants = [...variants];
+                                                                            updatedVariants[index].unit_price = e.target.value;
+                                                                            setVariants(updatedVariants);
+                                                                        }}
+                                                                        placeholder="Enter Unit Price"
+                                                                        className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
+                                                                    />
+                                                                </td>
+                                                                <td className="px-4 py-2">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={variant.cost}
+                                                                        onChange={(e) => {
+                                                                            const updatedVariants = [...variants];
+                                                                            updatedVariants[index].cost = e.target.value;
+                                                                            setVariants(updatedVariants);
+                                                                        }}
+                                                                        placeholder="Enter Unit Cost"
                                                                         className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
                                                                     />
                                                                 </td>
@@ -305,6 +265,8 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                                         <th className="px-4 py-3 font-medium">Heel Height</th>
                                                         <th className="px-4 py-3 font-medium">Size Value</th>
                                                         <th className="px-4 py-3 font-medium">SKU</th>
+                                                        <th className="px-4 py-3 font-medium">SRP</th>
+                                                        <th className="px-4 py-3 font-medium">COST</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-200">
@@ -317,19 +279,9 @@ const ViewProduct = ({ product, product_variants, colors, sizes, size_values, he
                                                                 <td className="px-4 py-2 text-gray-900">{colorName}</td>
                                                                 <td className="px-4 py-2 text-gray-900">{heelHeightName}</td>
                                                                 <td className="px-4 py-2 text-gray-900">{size_value}</td>
-                                                                <td className="px-4 py-2">
-                                                                    <input
-                                                                        type="text"
-                                                                        value={variant.sku}
-                                                                        onChange={(e) => {
-                                                                            const updatedVariants = [...variants];
-                                                                            updatedVariants[index].sku = e.target.value;
-                                                                            setVariants(updatedVariants);
-                                                                        }}
-                                                                        placeholder="Enter SKU"
-                                                                        className="w-full border border-gray-300 rounded-md px-3 py-1 focus:ring focus:ring-green-300 focus:outline-none transition"
-                                                                    />
-                                                                </td>
+                                                                <td className="px-4 py-2 text-gray-900">{variant.sku}</td>
+                                                                <td className="px-4 py-2 text-gray-900">{variant.unit_price}</td>
+                                                                <td className="px-4 py-2 text-gray-900">{variant.cost}</td>
                                                             </tr>
                                                         );
                                                     })}

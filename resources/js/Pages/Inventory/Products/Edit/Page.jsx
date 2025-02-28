@@ -54,7 +54,7 @@ const EditProduct = ({ product, colors, sizes, heel_heights, categories }) => {
                     <InputError message={errors.product_name} />
                   </div>
                   <div className="mb-4">
-                    <InputLabel for="status" value="Status" />
+                    {/* <InputLabel for="status" value="Status" /> */}
                     <TextInput
                       type="text"
                       id="status"
@@ -62,11 +62,12 @@ const EditProduct = ({ product, colors, sizes, heel_heights, categories }) => {
                       value={data.status}
                       onChange={(e) => setData('status', e.target.value)}
                       className="w-full border px-4 py-2"
+                      hidden
                     />
                     <InputError message={errors.status} />
                   </div>
                   <div className="mb-4">
-                      <InputLabel for="cost" value="Cost" />
+                      {/* <InputLabel for="cost" value="Cost" /> */}
                       <TextInput
                           type="number"
                           id="cost"
@@ -74,6 +75,7 @@ const EditProduct = ({ product, colors, sizes, heel_heights, categories }) => {
                           value={data.cost}
                           onChange={(e) => setData('cost', e.target.value)}
                           className="w-full border px-4 py-2"
+                          hidden
                       />
                       <InputError message={errors.status} />
                   </div>
