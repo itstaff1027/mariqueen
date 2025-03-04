@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\Models\UserWarehouse;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -14,11 +15,14 @@ class AssignUserToWarehouseController extends Controller
      */
     public function index()
     {
-        $Warehouse = Warehouse::all();
+        $Warehouses = Warehouse::all();
         $users = User::all();
+        $assigned_users = UserWarehouse::all();
+        // dd($users);
         return inertia('Inventory/Warehouses/Assign/Page', [
-            'Warehouses' => $Warehouse,
-            'Users' => $users
+            'warehouses' => $Warehouses,
+            'users' => $users,
+            'assignedUsers' => $assigned_users
         ]);
     }
 
@@ -27,7 +31,15 @@ class AssignUserToWarehouseController extends Controller
      */
     public function create()
     {
-        //
+        $Warehouses = Warehouse::all();
+        $users = User::all();
+        // $assigned_users = UserWarehouse::all();
+        // dd($users);
+        return inertia('Inventory/Warehouses/Assign/Create/Page', [
+            'warehouses' => $Warehouses,
+            'users' => $users,
+            // 'assignedUsers' => $assigned_users
+        ]);
     }
 
     /**
@@ -35,15 +47,37 @@ class AssignUserToWarehouseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validate request
+        $request->validate([
+            'warehouse_id' => 'required|integer',
+            'user_ids' => 'required|array'
+        ]); 
+    
+        // Extract only user IDs from array of objects
+        $userIds = collect($request->user_ids)->pluck('id');
+
+        $warehouse = Warehouse::findOrFail($request->warehouse_id);
+        $warehouse->user_warehouse()->sync($userIds);
+    
+        return redirect()->route('warehouses.index')->with('success', 'Users assigned to warehouse successfully!');
     }
+    
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        $Warehouses = Warehouse::findOrFail($id);
+        // dd($Warehouses);
+        $users = User::all();
+        $assigned_users = UserWarehouse::all();
+        // dd($users);
+        return inertia('Inventory/Warehouses/Assign/Page', [
+            'warehouses' => $Warehouses,
+            'users' => $users,
+            'assignedUsers' => $assigned_users
+        ]);
     }
 
     /**
@@ -67,6 +101,10 @@ class AssignUserToWarehouseController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = UserWarehouse::where('user_id', '=', $id)->first();
+
+        $user->delete();
+
+        return redirect()->route('warehouses.index')->with('success', 'Users assigned to warehouse successfully!');
     }
 }

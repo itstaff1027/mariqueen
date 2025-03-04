@@ -64,7 +64,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/inventory/store/stock/transfer', [StockLevelController::class, 'store_transferStock']);
     
     Route::resource('/inventory/warehouses', WarehouseController::class);
-    Route::resource('/inventory/warehouses/assign_warehouse', AssignUserToWarehouseController::class);
+    Route::resource('/inventory/warehouse/assign_warehouse', AssignUserToWarehouseController::class);
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function (){

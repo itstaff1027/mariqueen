@@ -33,6 +33,12 @@ const WarehouseList = ({ Warehouses }) => {
                                     >
                                         Add Warehouse
                                     </Link>
+                                    {/* <Link
+                                        href="/inventory/warehouse/assign_warehouse"
+                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                    >
+                                        Assign User to Warehouse
+                                    </Link> */}
                                 </div>
                                 <table className="w-full table-auto border-collapse border border-gray-300">
                                     <thead>
@@ -53,6 +59,12 @@ const WarehouseList = ({ Warehouses }) => {
                                                     className="text-blue-500 hover:underline"
                                                 >
                                                     Edit
+                                                </Link>
+                                                <Link
+                                                    href={`/inventory/warehouse/assign_warehouse/${Warehouse.id}`}
+                                                    className="text-yellow-500 hover:underline"
+                                                >
+                                                    Assign
                                                 </Link>
                                                 <button
                                                     type="button"
