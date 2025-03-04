@@ -1,0 +1,1 @@
+import{j as t}from"./app-CxxiVb06.js";import{A as e}from"./AuthenticatedLayout-Ca1yLvkt.js";import"./ApplicationLogo-BPvy8byy.js";const o=({sizes:s})=>t.jsxs(e,{header:t.jsx("h2",{className:"font-semibold text-xl text-gray-800 leading-tight",children:"Point of Sales"}),children:[t.jsx("h1",{children:"Hi Agent "}),"Hi"]});export{o as default};
