@@ -15,9 +15,9 @@ export default function AuthenticatedLayout({ header, children }) {
         { 'id': '3', 'name': 'Admin Panel', 'collapsed_name': 'AP', 'route': 'admin-panel.index' },
         { 'id': '4', 'name': 'Inventory', 'collapsed_name': 'INV', 'route': 'inventory' },
         { 'id': '5', 'name': 'Sales', 'collapsed_name': 'SS', 'route': 'sales' },
-        { 'id': '6', 'name': 'Settings', 'collapsed_name': 'S', 'route': 'settings' },
-        // { 'id': '5', 'name': 'CMS', 'collapsed_name': 'CMS', 'route': 'content_management' },
-        // { 'id': '3', 'name': 'Products', 'route': 'products' },
+        { 'id': '6', 'name': 'Logisitcs', 'collapsed_name': 'L', 'route': 'logistics' },
+        { 'id': '7', 'name': 'Finance', 'collapsed_name': 'F', 'route': 'finance' },
+        { 'id': '8', 'name': 'Settings', 'collapsed_name': 'S', 'route': 'settings' }
         // { 'id': '4', 'name': 'Tools', 'route': 'tools' },
     ];
 

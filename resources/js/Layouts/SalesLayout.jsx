@@ -15,16 +15,16 @@ export default function SalesLayout({ header, children }) {
             'name': 'Sales',
             'route': 'sales'
         },
-        // {
-        //     'id': '1',
-        //     'name': 'Products',
-        //     'route': 'products.index'
-        // },
-        // {
-        //     'id': '2',
-        //     'name': 'Stocks',
-        //     'route': 'stocks.index'
-        // },
+        {
+            'id': '1',
+            'name': 'Point of Sales',
+            'route': 'point_of_sales.index'
+        },
+        {
+            'id': '2',
+            'name': 'Customers',
+            'route': 'customers.index'
+        },
         // {
         //     'id': '3',
         //     'name': 'Warehouse',

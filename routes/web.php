@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\Inventory\ProductsController;
-use App\Http\Controllers\Inventory\StockLevelController;
-use App\Http\Controllers\Inventory\WarehouseController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -10,14 +7,21 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\Sales\CustomersController;
+use App\Http\Controllers\Inventory\ProductsController;
+use App\Http\Controllers\Logistics\CouriersController;
+use App\Http\Controllers\Sales\PointOfSalesController;
 use App\Http\Controllers\GlobalSettings\SizeController;
+use App\Http\Controllers\Inventory\WarehouseController;
 use App\Http\Controllers\GlobalSettings\ColorController;
+use App\Http\Controllers\Inventory\StockLevelController;
+use App\Http\Controllers\Finance\PaymentMethodsController;
 use App\Http\Controllers\GlobalSettings\CategoryController;
 use App\Http\Controllers\GlobalSettings\OrderTypeController;
 use App\Http\Controllers\GlobalSettings\SizeValueController;
 use App\Http\Controllers\GlobalSettings\HeelHeightController;
-use App\Http\Controllers\Inventory\AssignUserToWarehouseController;
 use App\Http\Controllers\Inventory\StockTransactionController;
+use App\Http\Controllers\Inventory\AssignUserToWarehouseController;
 
 Route::get('/', function () {
     return Redirect()->route('login');
@@ -67,6 +71,23 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/inventory/warehouse/assign_warehouse', AssignUserToWarehouseController::class);
 });
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('/customers', CustomersController::class);
+
+    Route::resource('/point_of_sales', PointOfSalesController::class);
+
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('/payment_methods', PaymentMethodsController::class);
+
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('/couriers', CouriersController::class);
+
+});
+
 Route::middleware(['auth', 'role:admin'])->group(function (){
     Route::get('/settings', function () {
         return Inertia:: render('Settings/Page');
@@ -77,6 +98,12 @@ Route::middleware(['auth', 'role:admin'])->group(function (){
     Route::get('/sales', function () {
         return Inertia:: render('Sales/Page');
     })->name('sales');
+    Route::get('/finance', function () {
+        return Inertia:: render('Finance/Page');
+    })->name('finance');
+    Route::get('/logistics', function () {
+        return Inertia:: render('Logistics/Page');
+    })->name('logistics');
 });
 
 require __DIR__.'/auth.php';
