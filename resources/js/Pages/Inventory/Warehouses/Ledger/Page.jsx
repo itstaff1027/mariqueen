@@ -1,12 +1,51 @@
 // resources/js/Pages/Inventory/StockLedger.jsx
 
 import React, { useState, useEffect } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 const StockLedger = ({ warehouse, ledgers, startDate, endDate, product_variants }) => {
     const [fromDate, setFromDate] = useState(startDate);
     const [toDate, setToDate] = useState(endDate);
+
+    // const [search, setSearch] = useState("");
+    // const [color, setColors] = useState("");
+    // const [size, setSizes] = useState("");
+    // const [sizeValue, setSizeValues] = useState("");
+    // const [heelHeight, setHeelHeights] = useState("");
+    // const [category, setCategory] = useState("");
+    // const [qtyFilter, setQtyFilter] = useState("all"); // New state for quantity filter
+
+    // const filteredProducts = product_variants.filter(stock => {
+    //     // Compute overall quantity
+    //     const overallQty = stock.total_purchased - stock.total_sold;
+
+    //     // Check quantity filter
+    //     let qtyMatches = true;
+    //     if (qtyFilter === "positive") {
+    //         qtyMatches = overallQty > 0;
+    //     } else if (qtyFilter === "zero") {
+    //         qtyMatches = overallQty === 0;
+    //     } else if (qtyFilter === "negative") {
+    //         qtyMatches = overallQty < 0;
+    //     }
+
+    //     // Other filters
+    //     const matchesFilters = (
+    //         (!category || stock.category_id === parseInt(category)) &&
+    //         (!size || stock.size_id === parseInt(size)) &&
+    //         (!sizeValue || stock.size_value_id === parseInt(sizeValue)) &&
+    //         (!heelHeight || stock.heel_height_id === parseInt(heelHeight)) &&
+    //         (!color || stock.color_id === parseInt(color))
+    //     );
+
+    //     const matchesSearch = search === "" ||
+    //         stock.sku.toLowerCase().includes(search.toLowerCase()) ||
+    //         stock.colors.color_name.toLowerCase().includes(search.toLowerCase()) ||
+    //         stock.categories.category_name.toLowerCase().includes(search.toLowerCase());
+
+    //     return matchesFilters && matchesSearch && qtyMatches;
+    // });
 
     // Function to re-fetch ledger when date filters change
     const updateLedger = () => {
@@ -96,9 +135,6 @@ const StockLedger = ({ warehouse, ledgers, startDate, endDate, product_variants 
             `${warehouse.name}_Simple_Stock_Ledger_${new Date().toISOString().split("T")[0]}.xlsx`
         );
     };
-      
-      
-  
 
     const exportExcel = () => {
         // 1. Determine all unique dates from the ledger data.
@@ -190,11 +226,9 @@ const StockLedger = ({ warehouse, ledgers, startDate, endDate, product_variants 
         );
     };
     
-    
-    
     useEffect(() => {
         // console.log(ledgers)
-        // console.log(product_variants)
+        console.log(product_variants)
     }, [])
 
     return (
@@ -247,82 +281,153 @@ const StockLedger = ({ warehouse, ledgers, startDate, endDate, product_variants 
                                 Export Simple Ledger
                             </button>
                         </div>
-                        <p className="text-sm text-gray-500 mt-4">
-                            Exported Excel will have columns for SKU, Product Name, Color, Size, Size Values, Heel Height, Categories, and dynamic columns for each date (with Beginning, Outgoing, Remaining), plus totals.
-                        </p>
+
+                        {/* <nav className="flex items-center justify-center mt-6">
+                            {product_variants.links.map((link, index) => {
+                                // If link.url is null, disable the link.
+                                const isDisabled = !link.url;
+                                const classes = isDisabled
+                                ? "mx-1 px-3 py-1 rounded-md text-sm bg-gray-200 text-gray-500 cursor-not-allowed"
+                                : link.active
+                                ? "mx-1 px-3 py-1 rounded-md text-sm bg-blue-500 text-white"
+                                : "mx-1 px-3 py-1 rounded-md text-sm bg-gray-200 text-gray-700 hover:bg-gray-300";
+
+                                return (
+                                    <Link
+                                        key={index}
+                                        href={link.url || "#"}
+                                        className={classes}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                );
+                            })}
+                        </nav> */}
 
                         {Object.entries(ledgers).length === 0 ? (
-  <p>No transactions found for this warehouse.</p>
-) : (
-  Object.entries(ledgers).map(([variantId, ledgerData]) => (
-    <div key={variantId} className="mb-8">
-      <h3 className="text-lg font-bold mb-2">
-        Product Variant ID: {variantId} - Opening Balance: {ledgerData.opening_balance}
-      </h3>
-      <h3 className="text-lg font-bold mb-2">
-        SKU: {product_variants.find(pv => pv.id === parseInt(variantId))?.sku}
-      </h3>
-      <table className="min-w-full divide-y divide-gray-200 mb-4">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Movement Type
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Total Change
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Daily Net
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Running Balance
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {Object.entries(ledgerData.byDate).length === 0 ? (
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap" colSpan="5">
-                No transactions in this period.
-              </td>
-            </tr>
-          ) : (
-            // Sort dates ascending before mapping.
-            Object.entries(ledgerData.byDate)
-              .sort((a, b) => a[0].localeCompare(b[0]))
-              .map(([date, data]) =>
-                data.entries.map((entry, idx) => (
-                  <tr key={`${date}-${entry.movement_type}`}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {idx === 0 ? date : ""}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap capitalize">
-                      {entry.movement_type}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {entry.total_change}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {idx === 0 ? data.daily_net : ""}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {idx === 0 ? data.running_balance : ""}
-                    </td>
-                  </tr>
-                ))
-              )
-          )}
-        </tbody>
-      </table>
-    </div>
-  ))
-)}
+                            <p className="text-center text-gray-600">No transactions found for this warehouse.</p>
+                        ) : (
+                        Object.entries(ledgers).map(([variantId, ledgerData]) => {
+                            // Find the product variant from the paginated data (if using pagination, adjust accordingly)
+                            const variant = product_variants
+                            ? product_variants.find(pv => pv.id === parseInt(variantId))
+                            : product_variants.find(pv => pv.id === parseInt(variantId));
+                            
+                            // Initialize aggregation variables
+                            let totalPurchase = 0,
+                            totalTransferOut = 0,
+                            totalTransferIn = 0,
+                            totalSold = 0;
 
+                            // Loop through each date in the ledger and sum up each movement type
+                            if (ledgerData.byDate) {
+                            Object.values(ledgerData.byDate).forEach(dateData => {
+                                (dateData.entries || []).forEach(entry => {
+                                    if (entry.movement_type === 'purchase') {
+                                        totalPurchase += Number(entry.total_change);
+                                    } else if (entry.movement_type === 'transfer_out') {
+                                        totalTransferOut += Number(entry.total_change);
+                                    } else if (entry.movement_type === 'transfer_in') {
+                                        totalTransferIn += Number(entry.total_change);
+                                    } else if (entry.movement_type === 'sold') {
+                                        totalSold += Number(entry.total_change);
+                                    }
+                                    });
+                                });
+                            }
+                            // Calculate net change: assuming net = (purchase + transfer_in) - (transfer_out + sold)
+                            const net = totalPurchase + totalTransferIn + (totalTransferOut - totalSold);
+                            // Calculate running balance as opening balance + net change.
+                            const runningBalance = Number(ledgerData.opening_balance) + net;
 
+                            return (
+                            <div key={variantId} className="mb-8 p-4 bg-white shadow rounded-lg">
+                                <div className="mb-4 border-b pb-2">
+                                    <h3 className="text-lg font-bold">
+                                        Product Variant ID: {variantId} - Opening Balance: {ledgerData.opening_balance}
+                                    </h3>
+                                    <h4 className="text-md text-gray-700">
+                                        SKU: {variant?.sku || "N/A"} - {variant?.product?.product_name || "Unnamed Product"}
+                                    </h4>
+                                    {variant && (
+                                        <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-600">
+                                        {variant.colors && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded">{variant.colors.color_name}</span>
+                                        )}
+                                        {variant.sizes && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded">{variant.sizes.size_name}</span>
+                                        )}
+                                        {variant.size_values && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded">{variant.size_values.size_values}</span>
+                                        )}
+                                        {variant.heelHeights && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded">{variant.heelHeights.value}</span>
+                                        )}
+                                        {variant.categories && (
+                                            <span className="px-2 py-1 bg-gray-100 rounded">{variant.categories.category_name}</span>
+                                        )}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Purchase
+                                                </th>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Transfer Out
+                                                </th>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Transfer In
+                                                </th>
+                                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                                Sold
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-100">
+                                            <tr>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{totalPurchase}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{totalTransferOut}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{totalTransferIn}</td>
+                                                <td className="px-4 py-3 text-sm text-gray-700">{totalSold}</td>
+                                            </tr>
+                                            <tr className="bg-gray-100">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700" colSpan="2">
+                                                    Net Change: {net}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700" colSpan="2">
+                                                    Running Balance: {runningBalance}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            );
+                        })
+                        )}
+                        {/* <nav className="flex items-center justify-center mt-6">
+                            {product_variants.links.map((link, index) => {
+                                // If link.url is null, disable the link.
+                                const isDisabled = !link.url;
+                                const classes = isDisabled
+                                ? "mx-1 px-3 py-1 rounded-md text-sm bg-gray-200 text-gray-500 cursor-not-allowed"
+                                : link.active
+                                ? "mx-1 px-3 py-1 rounded-md text-sm bg-blue-500 text-white"
+                                : "mx-1 px-3 py-1 rounded-md text-sm bg-gray-200 text-gray-700 hover:bg-gray-300";
 
+                                return (
+                                    <Link
+                                        key={index}
+                                        href={link.url || "#"}
+                                        className={classes}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                );
+                            })}
+                        </nav> */}
                     </div>
                 </div>
             </div>

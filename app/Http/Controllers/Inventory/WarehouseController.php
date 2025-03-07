@@ -179,9 +179,9 @@ class WarehouseController extends Controller
                 'size_values',
                 'heelHeights',
                 'categories',
-            ])
-            ->get();
-    
+            ])->get();
+            // ->paginate(5);
+                
         // Extract the product variant IDs.
         $productVariantIds = $productVariants->pluck('id');
     
