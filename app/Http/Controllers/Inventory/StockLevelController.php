@@ -3,7 +3,13 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Models\StockMovements;
+use App\Models\Size;
+use App\Models\User;
+use App\Models\Color;
 use App\Models\Warehouse;
+use App\Models\Categories;
+use App\Models\HeelHeight;
+use App\Models\SizeValues;
 use App\Models\StockLevels;
 use Illuminate\Http\Request;
 use App\Models\StockMovement;
@@ -60,7 +66,12 @@ class StockLevelController extends Controller
         
         // dd($products);
         return inertia('Inventory/Products/Stock/Page', [
-            'products' => $products
+            'products' => $products,
+            'colors' => Color::all(),
+            'sizes' => Size::all(),
+            'size_values' => SizeValues::all(),
+            'heel_heights' => HeelHeight::all(),
+            'categories' => Categories::all(),
         ]);
     }
 

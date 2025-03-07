@@ -66,6 +66,18 @@ const WarehouseList = ({ Warehouses }) => {
                                                 >
                                                     Assign
                                                 </Link>
+                                                <Link
+                                                    href={`/inventory/warehouses/${Warehouse.id}`}
+                                                    className="text-emerald-500 hover:underline"
+                                                >
+                                                    View
+                                                </Link>
+                                                <Link
+                                                    href={`/inventory/warehouses/${Warehouse.id}/ledger/`}
+                                                    className="text-emerald-500 hover:underline"
+                                                >
+                                                    Ledger
+                                                </Link>
                                                 <button
                                                     type="button"
                                                     onClick={(e) => destroy(e, Warehouse.id)}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights, categories }) => {
+const WarehouseProductVariantList = ({ warehouse, products, colors, sizes, size_values, heel_heights, categories }) => {
     const [search, setSearch] = useState("");
     const [color, setColors] = useState("");
     const [size, setSizes] = useState("");
@@ -13,7 +13,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
 
     const filteredProducts = products.filter(stock => {
         // Compute overall quantity
-        const overallQty = stock.total_purchased - stock.total_sold;
+        const overallQty = stock.total_stock;
 
         // Check quantity filter
         let qtyMatches = true;
@@ -27,28 +27,29 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
 
         // Other filters
         const matchesFilters = (
-            (!category || stock.category_id === parseInt(category)) &&
-            (!size || stock.size_id === parseInt(size)) &&
-            (!sizeValue || stock.size_value_id === parseInt(sizeValue)) &&
-            (!heelHeight || stock.heel_height_id === parseInt(heelHeight)) &&
-            (!color || stock.color_id === parseInt(color))
+            (!category || stock.product_variant.category_id === parseInt(category)) &&
+            (!size || stock.product_variant.size_id === parseInt(size)) &&
+            (!sizeValue || stock.product_variant.size_value_id === parseInt(sizeValue)) &&
+            (!heelHeight || stock.product_variant.heel_height_id === parseInt(heelHeight)) &&
+            (!color || stock.product_variant.color_id === parseInt(color))
         );
 
         const matchesSearch = search === "" ||
-            stock.sku.toLowerCase().includes(search.toLowerCase()) ||
-            stock.colors.color_name.toLowerCase().includes(search.toLowerCase()) ||
-            stock.categories.category_name.toLowerCase().includes(search.toLowerCase());
+            stock.product_variant.sku.toLowerCase().includes(search.toLowerCase()) ||
+            stock.product_variant.colors.color_name.toLowerCase().includes(search.toLowerCase()) ||
+            stock.product_variant.categories.category_name.toLowerCase().includes(search.toLowerCase());
 
         return matchesFilters && matchesSearch && qtyMatches;
     });
 
     useEffect(() => {
         console.log(products);
+        console.log(warehouse)
     }, [products]);
 
     // Existing export to Excel function remains unchanged (if needed)
     const handleExportExcel = () => {
-        const exportData = filteredProducts.map(product => ({
+        const exportData = filteredProducts.map((product) => ({
             SKU: product.product_variant.sku,
             Design: product.product_variant.product.product_name,
             Color: product.product_variant.colors.color_name,
@@ -56,19 +57,21 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
             SizeValues: product.product_variant.size_values.size_values,
             HeelHeight: product.product_variant.heel_heights.value,
             Category: product.product_variant.categories.category_name,
-            OverallQty: product.total_purchased - product.total_sold,
+            OverallQty: product.total_stock,
         }));
+
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Over all Product Stocks");
-        XLSX.writeFile(workbook, `product_variants_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, `${warehouse.name} Products`);
+        XLSX.writeFile(workbook, `${warehouse.name}_product_list_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Products Management
+                    Warehouse - {warehouse.name}
                 </h2>
             }
         >
@@ -79,18 +82,18 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                             <div className="container mx-auto p-6">
                                 <div className="mb-6 flex items-center justify-between">
                                     <h1 className="text-2xl font-bold">
-                                        Product Variants
+                                        Available Products
                                     </h1>
                                     <div className="flex gap-2">
                                         <Link
                                             href="/inventory/stock/transactions"
-                                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                            className="rounded bg-blue-500 px-4 py-2 text-white shadow hover:bg-blue-600"
                                         >
                                             Stock Transactions
                                         </Link>
                                         <button
                                             onClick={handleExportExcel}
-                                            className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600"
+                                            className="rounded bg-green-500 px-4 py-2 text-white shadow hover:bg-green-600"
                                         >
                                             Export to Excel
                                         </button>
@@ -100,7 +103,9 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     <select
                                         value={category || ''}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
-                                        onChange={(e) => setCategory(e.target.value)}
+                                        onChange={(e) =>
+                                            setCategory(e.target.value)
+                                        }
                                     >
                                         <option value="">All Categories</option>
                                         {categories.map((cat) => (
@@ -113,11 +118,16 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     <select
                                         value={size || ''}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
-                                        onChange={(e) => setSizes(e.target.value)}
+                                        onChange={(e) =>
+                                            setSizes(e.target.value)
+                                        }
                                     >
                                         <option value="">All Sizes</option>
                                         {sizes.map((size) => (
-                                            <option key={size.id} value={size.id}>
+                                            <option
+                                                key={size.id}
+                                                value={size.id}
+                                            >
                                                 {size.size_name}
                                             </option>
                                         ))}
@@ -126,11 +136,16 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     <select
                                         value={sizeValue || ''}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
-                                        onChange={(e) => setSizeValues(e.target.value)}
+                                        onChange={(e) =>
+                                            setSizeValues(e.target.value)
+                                        }
                                     >
                                         <option value="">Size Values</option>
                                         {size_values.map((size_value) => (
-                                            <option key={size_value.id} value={size_value.id}>
+                                            <option
+                                                key={size_value.id}
+                                                value={size_value.id}
+                                            >
                                                 {size_value.size_values}
                                             </option>
                                         ))}
@@ -139,11 +154,18 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     <select
                                         value={heelHeight || ''}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
-                                        onChange={(e) => setHeelHeights(e.target.value)}
+                                        onChange={(e) =>
+                                            setHeelHeights(e.target.value)
+                                        }
                                     >
-                                        <option value="">All Heel Heights</option>
+                                        <option value="">
+                                            All Heel Heights
+                                        </option>
                                         {heel_heights.map((height) => (
-                                            <option key={height.id} value={height.id}>
+                                            <option
+                                                key={height.id}
+                                                value={height.id}
+                                            >
                                                 {height.value}
                                             </option>
                                         ))}
@@ -152,11 +174,16 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     <select
                                         value={color || ''}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
-                                        onChange={(e) => setColors(e.target.value)}
+                                        onChange={(e) =>
+                                            setColors(e.target.value)
+                                        }
                                     >
                                         <option value="">All Colors</option>
                                         {colors.map((color) => (
-                                            <option key={color.id} value={color.id}>
+                                            <option
+                                                key={color.id}
+                                                value={color.id}
+                                            >
                                                 {color.color_name}
                                             </option>
                                         ))}
@@ -166,23 +193,33 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     <select
                                         value={qtyFilter}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
-                                        onChange={(e) => setQtyFilter(e.target.value)}
+                                        onChange={(e) =>
+                                            setQtyFilter(e.target.value)
+                                        }
                                     >
-                                        <option value="all">All Quantities</option>
-                                        <option value="negative">Negative Quantities</option>
-                                        <option value="zero">Zero Quantities</option>
-                                        <option value="positive">Positive Quantities</option>
+                                        <option value="all">
+                                            All Quantities
+                                        </option>
+                                        <option value="negative">
+                                            Negative Quantities
+                                        </option>
+                                        <option value="zero">
+                                            Zero Quantities
+                                        </option>
+                                        <option value="positive">
+                                            Positive Quantities
+                                        </option>
                                     </select>
                                 </div>
 
                                 <input
                                     type="text"
-                                    placeholder="Search for a product..."
+                                    placeholder="Search for a product.product_variant..."
                                     className="w-full rounded-md border p-2"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
-                                <table className="w-full table-auto border-collapse border border-gray-300 text-center mt-4">
+                                <table className="mt-4 w-full table-auto border-collapse border border-gray-300 text-center">
                                     <thead>
                                         <tr className="bg-gray-100">
                                             <th className="border border-gray-300 px-4 py-2">
@@ -210,28 +247,47 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     </thead>
                                     <tbody>
                                         {filteredProducts.map((product) => (
-                                            <tr key={product.id}>
+                                            <tr
+                                                key={product.product_variant.id}
+                                            >
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.sku}
+                                                    {
+                                                        product.product_variant
+                                                            .sku
+                                                    }
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.total_purchased - product.total_sold}
+                                                    {product.total_stock}
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.heel_heights.value}
+                                                    {
+                                                        product.product_variant
+                                                            .heel_heights.value
+                                                    }
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.sizes.size_name}
+                                                    {
+                                                        product.product_variant
+                                                            .sizes.size_name
+                                                    }
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.size_values.size_values}
+                                                    {
+                                                        product.product_variant
+                                                            .size_values
+                                                            .size_values
+                                                    }
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.categories.category_name}
+                                                    {
+                                                        product.product_variant
+                                                            .categories
+                                                            .category_name
+                                                    }
                                                 </td>
                                                 <td className="space-x-2 border border-gray-300 px-6 py-3">
                                                     <Link
-                                                        href={`/inventory/product/variant/${product.id}`}
+                                                        href={`/inventory/product/variant/${product.product_variant.id}`}
                                                         className="text-orange-500 hover:underline"
                                                     >
                                                         View
@@ -250,4 +306,4 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
     );
 };
 
-export default ProductVariantList;
+export default WarehouseProductVariantList;
