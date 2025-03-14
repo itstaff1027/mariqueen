@@ -9,10 +9,6 @@ import Categories from "@/Components/Categories";
 const ViewProductVariant = ({
   product_variant,
   stock_per_warehouse,
-  colors,
-  sizes,
-  heel_heights,
-  categories,
 }) => {
   const { data, setData, put, errors } = useForm({
     product_name: product_variant.product.product_name || "",
@@ -105,12 +101,12 @@ const ViewProductVariant = ({
                           W-{stocks.warehouse_id}
                         </div>
                         <h2 className="text-lg font-bold mt-4">
-                            {stocks.warehouse_name}
+                            {stocks.warehouse.name}
                         </h2>
                         <div className="w-full mt-4">
                           <p className="text-gray-700">
                             <span className="font-semibold">Remaining Stocks:</span>{" "}
-                            {stocks.remaining_stock}
+                            {stocks.total_stock}
                           </p>
                           <p className="text-gray-700">
                             <span className="font-semibold">Purchased:</span>{" "}

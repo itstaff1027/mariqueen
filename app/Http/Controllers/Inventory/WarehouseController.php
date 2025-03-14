@@ -87,7 +87,7 @@ class WarehouseController extends Controller
                             DB::raw("SUM(quantity) as total_stock")
                         )
                         ->from('stock_movements')
-                        ->where('movement_type', 'transfer_out')
+                        ->whereIn('movement_type', ['transfer_out', 'sale'])
                         ->where('from_warehouse_id', $id)
                         ->groupBy('product_variant_id', 'from_warehouse_id')
                     );

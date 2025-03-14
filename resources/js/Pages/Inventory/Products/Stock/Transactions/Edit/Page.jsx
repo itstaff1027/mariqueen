@@ -18,10 +18,12 @@ const StockTransactionEdit = ({ product_variants, warehouses, stock_transaction,
     const [targetWarehouse, setTargetWarehouse] = useState(stock_transaction.to_warehouse_id || '');
     const [generalRemarks, setGeneralRemarks] = useState(stock_transaction.remarks || '');
     const [availableVariants, setAvailableVariants] = useState(product_variants);
+    const [stockLevels, setStockLevels] = useState([])
+    
 
     // ✅ Load existing transaction items into the form
     useEffect(() => {
-        console.log(transaction_items);
+        console.log(stock_transaction);
         if (stock_transaction.items) {
             setRows(stock_transaction.items.map(item => ({
                 id: item.product_variant_id,
@@ -33,8 +35,18 @@ const StockTransactionEdit = ({ product_variants, warehouses, stock_transaction,
 
     // ✅ Update available product variants when transaction type or source warehouse changes
     useEffect(() => {
+        // console.log(stock_transaction.from_warehouse_id);
+        axios.get(route('stock_movements', {id: stock_transaction.from_warehouse_id || stock_transaction.to_warehouse_id}))
+        .then(response => {
+            // response.data contains the fetched data
+            console.log(response.data);
+            setStockLevels(response.data);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
         if (transactionType === 'transfer' && sourceWarehouse) {
-            const filteredVariants = stock_levels
+            const filteredVariants = stockLevels
                 .map((stock) => stock.product_variant);
 
             setAvailableVariants(filteredVariants);
@@ -43,10 +55,23 @@ const StockTransactionEdit = ({ product_variants, warehouses, stock_transaction,
         }
     }, [transactionType, sourceWarehouse, transaction_items]);
 
-    // ✅ Prevent duplicate SKUs in dropdown selection
-    const getFilteredVariants = () => {
+    // Helper for purchase variants (all available variants not already selected)
+    const getPurchaseVariants = () => {
         const selectedSKUs = rows.map((row) => row.sku).filter(Boolean);
-        return availableVariants.filter(
+        return product_variants.filter(
+            (variant) => !selectedSKUs.includes(variant.sku)
+        );
+    };
+    
+    // Helper for transfer variants: filter by stock in the source warehouse
+    const getTransferVariants = () => {
+        const selectedSKUs = rows.map((row) => row.sku).filter(Boolean);
+        // Use stock_levels to filter only variants with available stock for the selected source warehouse.
+        const variantsWithStock = stockLevels
+            .map(stock => stock.product_variant);
+
+            console.log(stockLevels);
+        return variantsWithStock.filter(
             (variant) => !selectedSKUs.includes(variant.sku)
         );
     };
@@ -120,6 +145,19 @@ const StockTransactionEdit = ({ product_variants, warehouses, stock_transaction,
 
         router.post(`/inventory/stock/transactions/reject/${stock_transaction.id}`);
     }
+
+    const getStockMovements = (warehouse_id) => {
+        axios.get(route('stock_movements', {id: warehouse_id}))
+        .then(response => {
+            // response.data contains the fetched data
+            console.log(response.data);
+            setStockLevels(response.data);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    };
+
 
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Stock Transactions</h2>}>
@@ -239,42 +277,68 @@ const StockTransactionEdit = ({ product_variants, warehouses, stock_transaction,
                             </thead>
                             <tbody className="divide-y divide-gray-200">
                                 {rows.map((row, index) => {
-                                    const availableStock = stock_levels.find(stock => 
+                                    const availableStock = stockLevels.find(stock => 
                                         stock.product_variant_id === row.id
                                     )?.total_stock || 0;
                                     return (
                                         <tr key={index} className="hover:bg-gray-50 transition">
                                             {/* Product SKU Dropdown Input */}
                                             <td className="border px-4 py-2 relative">
-                                                <input
-                                                    type="text"
-                                                    className="w-full border px-2 py-1 rounded"
-                                                    placeholder="Search SKU"
-                                                    value={row.sku}
-                                                    onChange={(e) => {
-                                                        handleInputChange(index, 'sku', e.target.value);
-                                                        toggleDropdown(index);
-                                                    }}
-                                                    onFocus={() => toggleDropdown(index)}
-                                                    disabled={stock_transaction?.status === 'draft' ? false : true}
-                                                />
-                                                {dropdownVisible[index] && (
-                                                    <ul className="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
-                                                        {getFilteredVariants().filter(variant => 
-                                                            variant.sku.toLowerCase().includes(row.sku.toLowerCase())
-                                                        ).map((variant) => (
-                                                            <li
-                                                                key={variant.id}
-                                                                className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                                                                onClick={() => handleDropdownSelect(index, variant.sku, variant.id)}
-                                                                disabled={stock_transaction?.status === 'draft' ? false : true}
-                                                            >
-                                                                {variant.sku}
-                                                            </li>
+                                                        {transactionType === 'transfer' ? (
+                                                            <input
+                                                                type="text"
+                                                                className="w-full border px-2 py-1 rounded"
+                                                                placeholder="Search SKU (Transfer)"
+                                                                value={row.sku}
+                                                                onChange={(e) => {
+                                                                    handleInputChange(index, 'sku', e.target.value);
+                                                                    toggleDropdown(index);
+                                                                }}
+                                                                onFocus={() => toggleDropdown(index)}
+                                                            />
+                                                        ) : (
+                                                            <input
+                                                                type="text"
+                                                                className="w-full border px-2 py-1 rounded"
+                                                                placeholder="Search SKU (Purchase)"
+                                                                value={row.sku}
+                                                                onChange={(e) => {
+                                                                    handleInputChange(index, 'sku', e.target.value);
+                                                                    toggleDropdown(index);
+                                                                }}
+                                                                onFocus={() => toggleDropdown(index)}
+                                                            />
+                                                        )}
+                                                        {transactionType === 'transfer' ? dropdownVisible[index] && (
+                                                            <ul className="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
+                                                                {getTransferVariants().map((variant) => (
+                                                                    <li
+                                                                        key={variant.id}
+                                                                        className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                                                        onClick={() => handleDropdownSelect(index, variant.sku, variant.id)}
+                                                                    >
+                                                                        {variant.sku}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : (
+                                                            dropdownVisible[index] && (
+                                                            <ul className="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
+                                                                { getPurchaseVariants()
+                                                                .filter(variant =>
+                                                                    variant.sku.toLowerCase().includes(row.sku.toLowerCase())
+                                                                ).map((variant) => (
+                                                                    <li
+                                                                        key={variant.id}
+                                                                        className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                                                        onClick={() => handleDropdownSelect(index, variant.sku, variant.id)}
+                                                                    >
+                                                                        {variant.sku}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
                                                         ))}
-                                                    </ul>
-                                                )}
-                                            </td>
+                                                    </td>
 
                                             {/* Available Stock Display (Only for Transfers) */}
                                             {transactionType === 'transfer' && (

@@ -25,11 +25,11 @@ export default function SalesLayout({ header, children }) {
             'name': 'Customers',
             'route': 'customers.index'
         },
-        // {
-        //     'id': '3',
-        //     'name': 'Warehouse',
-        //     'route': 'warehouses.index'
-        // },
+        {
+            'id': '3',
+            'name': 'Discounts',
+            'route': 'discounts.index'
+        },
         // {
         //     'id': '4',
         //     'name': 'Categories',

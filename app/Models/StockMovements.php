@@ -20,7 +20,8 @@ class StockMovements extends Model
         'movement_type',
         'from_warehouse_id',
         'to_warehouse_id',
-        'remarks'
+        'remarks',
+        'sales_order_id'
     ];
 
     public function productVariant()

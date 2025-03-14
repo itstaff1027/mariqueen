@@ -53,6 +53,40 @@ class StockTransactionController extends Controller
         ]);
     }
 
+    public function get_stock_movements(string $id){
+        $stock_levels = StockMovements::select(
+            'product_variant_id',
+            'warehouse_id',
+            DB::raw("SUM(stock_change) as total_stock")
+        )
+        ->fromSub(function ($query) {
+            $query->select(
+                'product_variant_id',
+                'to_warehouse_id as warehouse_id',
+                DB::raw("SUM(quantity) as stock_change")
+            )
+            ->from('stock_movements')
+            ->whereIn('movement_type', ['purchase', 'transfer_in'])
+            ->groupBy('product_variant_id', 'to_warehouse_id')
+
+            ->unionAll(
+                StockMovements::select(
+                    'product_variant_id',
+                    'from_warehouse_id as warehouse_id',
+                    DB::raw("SUM(quantity) * 1 as stock_change")
+                )
+                ->whereIn('movement_type', ['transfer_out', 'sale'])
+                ->groupBy('product_variant_id', 'from_warehouse_id')
+            );
+        }, 'stock_summary')
+        ->where('warehouse_id', $id)
+        ->groupBy('product_variant_id', 'warehouse_id')
+        ->with(['productVariant'])
+        ->get();
+
+        return json_encode($stock_levels);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -225,16 +259,16 @@ class StockTransactionController extends Controller
      */
     public function show(string $id)
     {
-        $transaction = StockTransactions::with('productVariant.stockMovements')->findOrFail($id);
+        // dd($id);
+        $transaction = StockTransactions::with(['productVariant.stockMovements', 'items', 'items.productVariant'])->findOrFail($id);
+        // dd($transaction);
         // Fetch all warehouses
         $warehouses = Warehouse::all();
         $product_variants = ProductVariant::all();
-        $transaction_items = StockTransactionItems::with('productVariant')
-        ->where('stock_transaction_id', $id)
-        ->get();
 
         // Extract all relevant product_variant_ids
-        $variantIds = $transaction_items->pluck('product_variant_id')->toArray();
+        $variantIds = $transaction->items->pluck('product_variant_id')->toArray();
+        // dd($variantIds);
 
         // Fetch stock levels per warehouse
         $stock_levels = StockMovements::select(
@@ -258,7 +292,7 @@ class StockTransactionController extends Controller
                     'from_warehouse_id as warehouse_id',
                     DB::raw("SUM(quantity) * 1 as stock_change")
                 )
-                ->where('movement_type', 'transfer_out')
+                ->whereIn('movement_type', ['transfer_out', 'sale'])
                 ->groupBy('product_variant_id', 'from_warehouse_id')
             );
         }, 'stock_summary')
@@ -271,7 +305,7 @@ class StockTransactionController extends Controller
             'stock_transaction' => $transaction,
             'product_variants' => $product_variants,
             'warehouses' => $warehouses,
-            'transaction_items' => $transaction_items,
+            'transaction_items' => $transaction->items,
             'stock_levels' => $stock_levels
         ]);
     }
@@ -329,12 +363,10 @@ class StockTransactionController extends Controller
         $transaction = StockTransactions::findOrFail($id);
         // dd($transaction);
 
-        $transaction->update(['status' => 'approved']);
-
         $items = StockTransactionItems::where('stock_transaction_id', '=', $id)->get();
         // dd($items);
         DB::transaction(function () use ($items, $transaction) {
-            
+            $transaction->update(['status' => 'approved']);
             foreach ($items as $item) {
                 $productVariantId = $item['product_variant_id'];
                 $fromWarehouseId = $transaction['from_warehouse_id'];
@@ -348,10 +380,37 @@ class StockTransactionController extends Controller
     
                 if ($transactionType === 'transfer') {
                     // ✅ Check available stock before transferring
-                    $availableStock = StockMovements::where('product_variant_id', $productVariantId)
-                        ->where('to_warehouse_id',  '=',$fromWarehouseId)
-                        ->sum('quantity');
-                    if ($availableStock < $quantity) {
+                    $availableStock = StockMovements::select(
+                        'product_variant_id',
+                        'warehouse_id',
+                        DB::raw("SUM(stock_change) as total_stock")
+                    )
+                    ->fromSub(function ($query) {
+                        $query->select(
+                            'product_variant_id',
+                            'to_warehouse_id as warehouse_id',
+                            DB::raw("SUM(quantity) as stock_change")
+                        )
+                        ->from('stock_movements')
+                        ->whereIn('movement_type', ['purchase', 'transfer_in'])
+                        ->groupBy('product_variant_id', 'to_warehouse_id')
+            
+                        ->unionAll(
+                            StockMovements::select(
+                                'product_variant_id',
+                                'from_warehouse_id as warehouse_id',
+                                DB::raw("SUM(quantity) * 1 as stock_change")
+                            )
+                            ->whereIn('movement_type', ['transfer_out', 'sale'])
+                            ->groupBy('product_variant_id', 'from_warehouse_id')
+                        );
+                    }, 'stock_summary')
+                    ->where('product_variant_id', $productVariantId)
+                    ->where('warehouse_id', $fromWarehouseId)
+                    ->groupBy('product_variant_id', 'warehouse_id')
+                    ->first();
+                    // dd($availableStock);
+                    if ($availableStock->total_stock < $quantity) {
                         throw new \Exception("Not enough stock in source warehouse for SKU {$productVariantId}.");
                     }
     

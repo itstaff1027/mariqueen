@@ -215,7 +215,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                                     {product.sku}
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.total_purchased - product.total_sold}
+                                                    {(product.total_purchased - ( - product.total_sold))}
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
                                                     {product.heel_heights.value}

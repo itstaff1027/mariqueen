@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import axios from 'axios';
 
 const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) => {
     const [rows, setRows] = useState([]);
@@ -11,28 +12,46 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) =>
     const [status, setStatus] = useState('draft');
     const [generalRemarks, setGeneralRemarks] = useState('');
     const [availableVariants, setAvailableVariants] = useState(product_variants);
+    const [stockLevels, setStockLevels] = useState([])
+
+
 
     // ✅ Update available product variants when transaction type or source warehouse changes
     useEffect(() => {
-        console.log(stock_levels);
+        // console.log(stock_levels);
+        console.log(sourceWarehouse);
         if (transactionType === 'transfer' && sourceWarehouse) {
-            const filteredVariants = stock_levels
-                .filter((stock) => stock.to_warehouse_id.toString() === sourceWarehouse.toString())
+            const filteredVariants = stockLevels
+                .filter((stock) => stock.warehouse_id.toString() === sourceWarehouse.toString())
                 .map((stock) => stock.product_variant);
 
             setAvailableVariants(filteredVariants);
         } else {
             setAvailableVariants(product_variants);
         }
-    }, [transactionType, sourceWarehouse, stock_levels]);
+    }, [transactionType, sourceWarehouse, stockLevels]);
 
-    // ✅ Prevent duplicate SKUs in dropdown selection
-    const getFilteredVariants = () => {
+    // Helper for purchase variants (all available variants not already selected)
+    const getPurchaseVariants = () => {
         const selectedSKUs = rows.map((row) => row.sku).filter(Boolean);
-        return availableVariants.filter(
+        return product_variants.filter(
             (variant) => !selectedSKUs.includes(variant.sku)
         );
     };
+    
+    // Helper for transfer variants: filter by stock in the source warehouse
+    const getTransferVariants = () => {
+        const selectedSKUs = rows.map((row) => row.sku).filter(Boolean);
+        // Use stock_levels to filter only variants with available stock for the selected source warehouse.
+        const variantsWithStock = stockLevels
+            .map(stock => stock.product_variant);
+
+            console.log(stockLevels);
+        return variantsWithStock.filter(
+            (variant) => !selectedSKUs.includes(variant.sku)
+        );
+    };
+  
 
     const handleAddRow = () => {
         setRows([...rows, { id: '', sku: '', quantity: '' }]);
@@ -86,6 +105,18 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) =>
         router.post('/inventory/stock/transactions', transactionData);
     };
 
+    const getStockMovements = (warehouse_id) => {
+        axios.get(route('stock_movements', {id: warehouse_id}))
+        .then(response => {
+            // response.data contains the fetched data
+            console.log(response.data);
+            setStockLevels(response.data);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    };
+
     return (
         <AuthenticatedLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Stock Transactions</h2>}>
             <div className="py-12">
@@ -95,6 +126,7 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) =>
                             <div className="container mx-auto p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h1 className="text-2xl font-bold">Stock Transactions</h1>
+                                    <button type="button" onClick={getTransferVariants} className="text-2xl font-bold">test</button>
                                     <div className="space-x-2">
                                         <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 mt-4" onClick={handleSubmit}>Submit</button>
                                         <button
@@ -142,7 +174,10 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) =>
                                             <select
                                                 className="w-full border border-gray-300 rounded px-4 py-2"
                                                 value={sourceWarehouse}
-                                                onChange={(e) => setSourceWarehouse(e.target.value)}
+                                                onChange={(e) => {
+                                                    setSourceWarehouse(e.target.value)
+                                                    getStockMovements(e.target.value)
+                                                }}
                                             >
                                                 <option value="" disabled>Select Source Warehouse</option>
                                                 {warehouses.map((warehouse) => (
@@ -200,29 +235,56 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) =>
                                     <tbody>
                                         {rows.map((row, index) => {
                                             // ✅ Find available stock for the selected SKU in the selected source warehouse
-                                            const availableStock = stock_levels.find(stock => 
-                                                stock.product_variant_id === row.id &&
-                                                stock.to_warehouse_id.toString() === sourceWarehouse.toString()
+                                            const availableStock = stockLevels.find(stock => 
+                                                stock.product_variant_id === row.id
                                             )?.total_stock || 0;
 
                                             return (
                                                 <tr key={index}>
                                                     {/* Product SKU Input with Auto-Filtering Dropdown */}
                                                     <td className="border px-4 py-2 relative">
-                                                        <input
-                                                            type="text"
-                                                            className="w-full border px-2 py-1 rounded"
-                                                            placeholder="Search SKU"
-                                                            value={row.sku}
-                                                            onChange={(e) => {
-                                                                handleInputChange(index, 'sku', e.target.value);
-                                                                toggleDropdown(index);
-                                                            }}
-                                                            onFocus={() => toggleDropdown(index)}
-                                                        />
-                                                        {dropdownVisible[index] && (
+                                                        {transactionType === 'transfer' ? (
+                                                            <input
+                                                                type="text"
+                                                                className="w-full border px-2 py-1 rounded"
+                                                                placeholder="Search SKU (Transfer)"
+                                                                value={row.sku}
+                                                                onChange={(e) => {
+                                                                    handleInputChange(index, 'sku', e.target.value);
+                                                                    toggleDropdown(index);
+                                                                }}
+                                                                onFocus={() => toggleDropdown(index)}
+                                                            />
+                                                        ) : (
+                                                            <input
+                                                                type="text"
+                                                                className="w-full border px-2 py-1 rounded"
+                                                                placeholder="Search SKU (Purchase)"
+                                                                value={row.sku}
+                                                                onChange={(e) => {
+                                                                    handleInputChange(index, 'sku', e.target.value);
+                                                                    toggleDropdown(index);
+                                                                }}
+                                                                onFocus={() => toggleDropdown(index)}
+                                                            />
+                                                        )}
+                                                        {transactionType === 'transfer' ? dropdownVisible[index] && (
                                                             <ul className="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
-                                                                {getFilteredVariants().filter(variant => 
+                                                                {getTransferVariants().map((variant) => (
+                                                                    <li
+                                                                        key={variant.id}
+                                                                        className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                                                                        onClick={() => handleDropdownSelect(index, variant.sku, variant.id)}
+                                                                    >
+                                                                        {variant.sku}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : (
+                                                            dropdownVisible[index] && (
+                                                            <ul className="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
+                                                                { getPurchaseVariants()
+                                                                .filter(variant =>
                                                                     variant.sku.toLowerCase().includes(row.sku.toLowerCase())
                                                                 ).map((variant) => (
                                                                     <li
@@ -234,7 +296,7 @@ const StockTransactionForm = ({ product_variants, warehouses, stock_levels }) =>
                                                                     </li>
                                                                 ))}
                                                             </ul>
-                                                        )}
+                                                        ))}
                                                     </td>
 
                                                     {/* Available Stock Display (Only for Transfers) */}

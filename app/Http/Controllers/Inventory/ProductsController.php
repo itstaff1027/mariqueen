@@ -95,70 +95,47 @@ class ProductsController extends Controller
             'stockMovements.warehouse' // Ensure warehouse details are included
         ])
         ->first(); // Using first() to return a single product variant
-    
-        // ✅ Get Stock Summary for Each Warehouse (Purchases, Sales, Returns, etc.)
-        $stockPerWarehouse = StockMovements::with('warehouse')
+        
+        $stockPerWarehouse = StockMovements::with([
+            'warehouse',
+            'productVariant',
+            'productVariant.product',
+            'productVariant.colors',
+            'productVariant.sizes',
+            'productVariant.size_values',
+            'productVariant.heelHeights',
+            'productVariant.categories',
+        ])
         ->where('product_variant_id', $id)
-        ->select('to_warehouse_id as warehouse_id')
         ->selectRaw("
+            product_variant_id,
+            CASE 
+                WHEN movement_type IN ('purchase', 'transfer_in', 'return') THEN to_warehouse_id 
+                ELSE from_warehouse_id 
+            END as warehouse_id,
+            SUM(quantity) as total_stock,
             SUM(CASE WHEN movement_type = 'purchase' THEN quantity ELSE 0 END) as total_purchased,
             SUM(CASE WHEN movement_type = 'sale' THEN quantity ELSE 0 END) as total_sold,
             SUM(CASE WHEN movement_type = 'return' THEN quantity ELSE 0 END) as total_return,
             SUM(CASE WHEN movement_type = 'adjustment' THEN quantity ELSE 0 END) as total_adjustment,
             SUM(CASE WHEN movement_type = 'correction' THEN quantity ELSE 0 END) as total_correction,
-            SUM(CASE WHEN movement_type = 'repair' THEN quantity ELSE 0 END) as total_repair
+            SUM(CASE WHEN movement_type = 'repair' THEN quantity ELSE 0 END) as total_repair,
+            SUM(CASE WHEN movement_type = 'transfer_in' THEN quantity ELSE 0 END) as total_transfer_in,
+            SUM(CASE WHEN movement_type = 'transfer_out' THEN quantity ELSE 0 END) as total_transfer_out
         ")
-        ->groupBy('to_warehouse_id')
-        ->get()
-        ->keyBy('warehouse_id'); // ✅ Use `keyBy` for easy lookup
+        ->groupBy(DB::raw("
+            CASE 
+                WHEN movement_type IN ('purchase', 'transfer_in', 'return') THEN to_warehouse_id 
+                ELSE from_warehouse_id 
+            END,
+            product_variant_id
+        "))
+        ->get();
 
-        // ✅ Get Incoming Transfers (Stock Added to Warehouses)
-        $transferIn = StockMovements::where('product_variant_id', $id)
-        ->where('movement_type', 'transfer_in')
-        ->select('to_warehouse_id as warehouse_id')
-        ->selectRaw("SUM(quantity) as total_transfer_in")
-        ->groupBy('to_warehouse_id')
-        ->get()
-        ->keyBy('warehouse_id'); // ✅ Grouped by warehouse_id
-
-        // ✅ Get Outgoing Transfers (Stock Removed from Warehouses)
-        $transferOut = StockMovements::where('product_variant_id', $id)
-        ->where('movement_type', 'transfer_out')
-        ->select('from_warehouse_id as warehouse_id')
-        ->selectRaw("SUM(quantity) as total_transfer_out")
-        ->groupBy('from_warehouse_id')
-        ->get()
-        ->keyBy('warehouse_id'); // ✅ Grouped by warehouse_id
-
-        // ✅ Merge Incoming & Outgoing Transfers into `stockPerWarehouse`
-        $stockPerWarehouse = $stockPerWarehouse->map(function ($stock) use ($transferIn, $transferOut) {
-        $warehouseId = $stock->warehouse_id;
-
-            return [
-                'warehouse_id' => $warehouseId,
-                'warehouse_name' => $stock->warehouse ? $stock->warehouse->name : 'Unknown',
-                'total_purchased' => $stock->total_purchased,
-                'total_sold' => $stock->total_sold,
-                'total_transfer_in' => $transferIn[$warehouseId]->total_transfer_in ?? 0, // ✅ Incoming transfers
-                'total_transfer_out' => $transferOut[$warehouseId]->total_transfer_out ?? 0, // ✅ Outgoing transfers
-                'total_return' => $stock->total_return,
-                'total_adjustment' => $stock->total_adjustment,
-                'total_correction' => $stock->total_correction,
-                'total_repair' => $stock->total_repair,
-                'remaining_stock' => ($stock->total_purchased + ($transferIn[$warehouseId]->total_transfer_in ?? 0))
-                                    - ($stock->total_sold + (-($transferOut[$warehouseId]->total_transfer_out ?? 0))) // ✅ Final Stock Calculation
-            ];
-        });
-
-
+            // dd($stockPerWarehouse);
         return inertia('Inventory/Products/Variants/Page', [
-            'product_variant' => $product ?: null,
-            'stock_per_warehouse' => $stockPerWarehouse->values(), // ✅ Pass warehouse-wise aggregated data
-            'colors' => Color::all(),
-            'sizes' => Size::all(),
-            'size_values' => SizeValues::all(),
-            'heel_heights' => HeelHeight::all(),
-            'categories' => Categories::all(),
+            'product_variant' => $product,
+            'stock_per_warehouse' => $stockPerWarehouse,
         ]);
     }
     

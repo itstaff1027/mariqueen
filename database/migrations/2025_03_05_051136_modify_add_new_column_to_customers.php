@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::table('customers', function (Blueprint $table) {
             $table->string('receiver_name', 255)->default('');
         });
+
+        Schema::table('stock_movements', function (Blueprint $table) {
+            $table->foreignId('sales_order_id')->nullable()->constrained('sales_orders')->onDelete('set null');
+        });
     }
 
     /**
@@ -23,6 +27,10 @@ return new class extends Migration
     {
         Schema::table('customers', function (Blueprint $table) {
             $table->dropColumn(['receiver_name']); // Drop both columns if rollback is needed
+        });
+
+        Schema::table('customers', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('sales_order_id');
         });
     }
 };
