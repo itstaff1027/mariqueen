@@ -35,11 +35,11 @@ export default function InventoryLayout({ header, children }) {
             'name': 'Warehouse',
             'route': 'warehouses.index'
         },
-        // {
-        //     'id': '4',
-        //     'name': 'Categories',
-        //     'route': 'settings_categories.index'
-        // },
+        {
+            'id': '4',
+            'name': 'Sales Orders',
+            'route': 'inventory_orders.index'
+        },
         // {
         //     'id': '5',
         //     'name': 'Order Types',

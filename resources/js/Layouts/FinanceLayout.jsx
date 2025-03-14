@@ -20,11 +20,11 @@ export default function FinanceLayout({ header, children }) {
             'name': 'Payment Methods',
             'route': 'payment_methods.index'
         },
-        // {
-        //     'id': '2',
-        //     'name': 'Stocks',
-        //     'route': 'stocks.index'
-        // },
+        {
+            'id': '2',
+            'name': 'Sales Orders',
+            'route': 'finance_orders.index'
+        },
         // {
         //     'id': '3',
         //     'name': 'Warehouse',

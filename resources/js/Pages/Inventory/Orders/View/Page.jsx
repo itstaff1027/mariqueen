@@ -77,8 +77,8 @@ const SalesOrderView = ({ sales_order, user}) => {
         // Flatten the permissions from all roles into one array
         const allPermissions = user.roles.flatMap(role => role.permissions);
         const statuses = [];
-        if (allPermissions.some(perm => perm.name === 'approve' && sales_order.status !== 'cancelled')) {
-            statuses.push('approved');
+        if (allPermissions.some(perm => perm.name === 'update' && sales_order.status !== 'cancelled')) {
+            statuses.push('preparing');
         }
         if (allPermissions.some(perm => perm.name === 'cancel')) {
             statuses.push('cancelled');
@@ -95,7 +95,7 @@ const SalesOrderView = ({ sales_order, user}) => {
             )
         ) {
             const newStatus = status;
-            router.post(`/sales_orders/update/status/${sales_order.id}`, { new_status: newStatus})
+            router.post(`/finance_orders/update/status/${sales_order.id}`, { new_status: newStatus})
         }
     }
     return (

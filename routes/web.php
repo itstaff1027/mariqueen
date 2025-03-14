@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Inventory\InventoryOrderController;
+use App\Http\Controllers\Logistics\LogisticsOrderController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -74,9 +76,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/inventory/warehouses', WarehouseController::class);
     Route::get('/inventory/warehouses/{warehouseId}/ledger', [WarehouseController::class, 'showLedger']);
 
-
-
     Route::resource('/inventory/warehouse/assign_warehouse', AssignUserToWarehouseController::class);
+
+    Route::resource('/inventory_orders', InventoryOrderController::class);
+    Route::post('/inventory_orders/update/status/{id}', [InventoryOrderController::class, 'update_status'])->name('inventory_orders.update_status');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -93,13 +96,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/payment_methods', PaymentMethodsController::class);
 
-    // Route::resource('/finance_orders', FinanceOrdersController::class);
-
+    Route::resource('/finance_orders', FinanceOrdersController::class);
+    Route::post('/finance_orders/update/status/{id}', [FinanceOrdersController::class, 'update_status'])->name('finance_orders.update_status');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/couriers', CouriersController::class);
 
+    Route::resource('/logistics_orders', LogisticsOrderController::class);
+    Route::post('/logistics_orders/update/status/{id}', [LogisticsOrderController::class, 'update_status'])->name('logistics_orders.update_status');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function (){
