@@ -19,8 +19,8 @@ class LogisticsOrderController extends Controller
             'customers',
             'payments',
         ])
-        ->orderBy('created_at', 'desc')->get();
-        return inertia('Finance/Orders/Page', [
+        ->orderBy('created_at', 'desc')->whereIn('status', ['preparing', 'shipped', 'delivered'])->get();
+        return inertia('Logistics/Orders/Page', [
             'sales_orders' => $sales_orders,
         ]);
     }
@@ -60,7 +60,7 @@ class LogisticsOrderController extends Controller
         ])
         ->where('id', $id)
         ->first();
-        return inertia('Finance/Orders/View/Page', [
+        return inertia('Logistics/Orders/View/Page', [
             'sales_order' => $sales_order,
             'user' => $user,
         ]);

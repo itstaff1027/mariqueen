@@ -78,13 +78,10 @@ const SalesOrderView = ({ sales_order, user}) => {
         const allPermissions = user.roles.flatMap(role => role.permissions);
         const statuses = [];
         if (allPermissions.some(perm => perm.name === 'update' && sales_order.status !== 'cancelled')) {
-            statuses.push('paid');
+            statuses.push('shipped');
         }
         if (allPermissions.some(perm => perm.name === 'update' && sales_order.status !== 'cancelled')) {
-            statuses.push('partial');
-        }
-        if (allPermissions.some(perm => perm.name === 'refund' && sales_order.status !== 'cancelled')) {
-            statuses.push('refunded');
+            statuses.push('delivered');
         }
         if (allPermissions.some(perm => perm.name === 'cancel')) {
             statuses.push('cancelled');
@@ -101,7 +98,7 @@ const SalesOrderView = ({ sales_order, user}) => {
             )
         ) {
             const newStatus = status;
-            router.post(`/finance_orders/update/status/${sales_order.id}`, { new_status: newStatus})
+            router.post(`/logistics_orders/update/status/${sales_order.id}`, { new_status: newStatus})
         }
     }
     return (

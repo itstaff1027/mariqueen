@@ -20,11 +20,11 @@ export default function LogisticsLayout({ header, children }) {
             'name': 'Couriers',
             'route': 'couriers.index'
         },
-        // {
-        //     'id': '2',
-        //     'name': 'Stocks',
-        //     'route': 'stocks.index'
-        // },
+        {
+            'id': '2',
+            'name': 'Sales Orders',
+            'route': 'logistics_orders.index'
+        },
         // {
         //     'id': '3',
         //     'name': 'Warehouse',

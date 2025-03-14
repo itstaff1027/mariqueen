@@ -109,7 +109,6 @@ class InventoryOrderController extends Controller
             });
         }
         
-        
         if(in_array($request->new_status, [
             'cancelled'
         ])) {
@@ -119,6 +118,6 @@ class InventoryOrderController extends Controller
             });
         }
 
-        return redirect()->route('logistics_orders.index')->with('success', 'Successfully Updated Sales Order Status');
+        return redirect()->route('inventory_orders.index')->with('success', 'Successfully Updated Sales Order Status');
     }
 }

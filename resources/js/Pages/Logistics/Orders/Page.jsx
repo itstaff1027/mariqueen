@@ -77,7 +77,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                                     Edit
                                                 </Link> */}
                                                 <Link
-                                                    href={`/finance_orders/${sales_order.id}`}
+                                                    href={`/logistics_orders/${sales_order.id}`}
                                                     className="text-emerald-500 hover:underline"
                                                 >
                                                     View

@@ -95,7 +95,7 @@ const SalesOrderView = ({ sales_order, user}) => {
             )
         ) {
             const newStatus = status;
-            router.post(`/finance_orders/update/status/${sales_order.id}`, { new_status: newStatus})
+            router.post(`/inventory_orders/update/status/${sales_order.id}`, { new_status: newStatus})
         }
     }
     return (
