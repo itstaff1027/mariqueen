@@ -30,11 +30,11 @@ export default function SalesLayout({ header, children }) {
             'name': 'Discounts',
             'route': 'discounts.index'
         },
-        // {
-        //     'id': '4',
-        //     'name': 'Categories',
-        //     'route': 'settings_categories.index'
-        // },
+        {
+            'id': '4',
+            'name': 'Sales Payments',
+            'route': 'sales_payments.index'
+        },
         // {
         //     'id': '5',
         //     'name': 'Order Types',

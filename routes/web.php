@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Inventory\InventoryOrderController;
 use App\Http\Controllers\Logistics\LogisticsOrderController;
+use App\Http\Controllers\Sales\SalesPaymentController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -91,6 +92,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/sales_orders', SalesOrderController::class);
     Route::post('/sales_orders/update/status/{id}', [SalesOrderController::class, 'update_status'])->name('sales_orders.update_status');
 
+    Route::resource('/sales_payments', SalesPaymentController::class);
+    Route::get('/sales_order/{id}', [SalesPaymentController::class, 'get_sales_order']);
+    // Route::resource('/sales_payments', SalesPaymentController::class);
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

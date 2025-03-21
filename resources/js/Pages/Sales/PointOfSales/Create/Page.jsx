@@ -34,11 +34,13 @@ const POS = ({
         remarks: '',
         fixed_discount: 0,
         customer_id: 0,
+        images: []
     });
     
     const [search, setSearch] = useState("");
     const [customerSearch, setCustomerSearch] = useState("");
     const [customerDropdownVisible, setCustomerDropdownVisible] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
 
     // Filtering logic for customers
     const getFilteredCustomers = () => {
@@ -254,9 +256,26 @@ const POS = ({
     
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/point_of_sales');
+        // Create a new FormData instance
+        const formData = new FormData();
+
+        // Append each selected file to the FormData
+        for (let i = 0; i < data.images.length; i++) {
+            formData.append('images[]', data.images[i]);
+        }
+
+        post('/point_of_sales', {
+            data: formData,
+            forceFormData: true,
+        });
         console.log(data);
     }
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setData('images', files);
+        setSelectedFiles(files);
+    };
 
     useEffect(() => {
         console.log(stock_levels)
@@ -642,6 +661,29 @@ const POS = ({
                                 ? `Balance Due: ₱${Math.abs(balance).toFixed(2)}`
                                 : `Change: ₱${balance.toFixed(2)}`}
                         </p>
+
+                        <div>
+                            <h1 className="text-2xl font-bold mb-4">Upload Payment Images (Multiple Allowed)</h1>
+                            <input
+                                type="file"
+                                name="images"
+                                multiple
+                                onChange={handleFileChange}
+                                className="border p-2 rounded"
+                            />
+                            {errors.images && <div className="text-red-500 mt-2">{errors.images}</div>}
+
+                            {selectedFiles.length > 0 && (
+                                <div className="mt-4">
+                                    <h2 className="text-lg font-bold">Selected Files:</h2>
+                                    <ul className="list-disc list-inside">
+                                        {selectedFiles.map((file, index) => (
+                                            <li key={index} className="text-gray-700">{file.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                         <button
                             onClick={handleSubmit}
                             className={`${data.cart.length === 0 ||

@@ -54,6 +54,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                             <th className="border border-gray-300 px-4 py-2">Status</th>
                                             <th className="border border-gray-300 px-4 py-2">Total Cost</th>
                                             <th className="border border-gray-300 px-4 py-2">Payment</th>
+                                            <th className="border border-gray-300 px-4 py-2">Balance</th>
                                             <th className="border border-gray-300 px-4 py-2">Action</th>
                                         </tr>
                                     </thead>
@@ -69,6 +70,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                             <td className="border border-gray-300 px-4 py-2">
                                                 {sales_order.payments.reduce((total, p) => total + parseFloat(p.amount_paid, 2), 0).toFixed(2)}
                                             </td>
+                                            <td className="border border-gray-300 px-4 py-2">{sales_order.balance}</td>
                                             <td className="border border-gray-300 px-6 py-3 space-x-2">
                                                 <Link
                                                     href={`/point_of_sales/${sales_order.id}/edit`}

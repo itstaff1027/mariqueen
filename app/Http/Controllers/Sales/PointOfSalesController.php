@@ -26,6 +26,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Sales\SalesOrderItems;
 use App\Models\Finance\PaymentMethods;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 class PointOfSalesController extends Controller
 {
@@ -165,6 +167,7 @@ class PointOfSalesController extends Controller
                 'rush_order_fee' => $request->rush_order_fee ? $request->rush_order_fee : 0,
                 'total_amount' => $request->total_amount,   // from your business logic
                 'grand_amount' => $request->grand_total,   // after discounts, fees, etc.
+                'balance' => $request->payment_amount === 0 || $request->payment_amount < $request->grand_total ? $request->grand_total - $request->payment_amount : $request->payment_amount,
                 'status' => 'pending',
                 'remarks' => $request->remarks,
                 'user_id' => auth()->id(),
@@ -205,7 +208,7 @@ class PointOfSalesController extends Controller
             SalesOrderItems::insert($saleOrderItemsToInsert);
 
             // Create the payment record.
-            SalesPayments::create([
+            $sales_payment = SalesPayments::create([
                 'sales_order_id' => $order->id,
                 'amount_paid' => $request->payment_amount,
                 'change_due' => $request->payment_amount > $request->grand_total ? $request->payment_amount - $request->grand_total : 0,   // calculated from payment amount and grand total
@@ -213,11 +216,42 @@ class PointOfSalesController extends Controller
                 'excess_amount' => $request->payment_amount > $request->grand_total ? $request->payment_amount - $request->grand_total : 0,
                 'status' => $request->payment_amount >= $request->grand_total 
                     ? 'paid' 
-                    : ($request->payment_amount > 0 && $request->paymenet_amount < $request->grand_total ? 'partial' : 'un-paid'),
+                    : ($request->payment_amount > 0 && $request->payment_amount < $request->grand_total ? 'partial' : 'un-paid'),
                 'payment_method_id' => $request->payment_method_id,
                 'remarks' => $request->remarks,
                 'user_id' => auth()->id(),
             ]);
+
+            // Get the uploaded files; if only one file is uploaded, ensure it's handled as an array.
+            $imageFiles = $request->file('images');
+            // dd($imageFiles);
+            if($imageFiles) {
+                if (!is_array($imageFiles)) {
+                    $imageFiles = [$imageFiles];
+                }
+
+                foreach ($imageFiles as $file) {
+                    // // Create an Intervention Image instance for each file.
+                    // $image = Image::make($file);
+                    
+                    // // Convert the image to WebP format at 80% quality.
+                    // $image->encode('webp', 80);
+
+                    // // Generate a unique file name. You might want to use order id, timestamp, and uniqid.
+                    $fileName = 'payment_images/' . $order->id;
+
+                    // Save the image to the "public" disk (ensure you have run `php artisan storage:link`)
+                    Storage::disk('public')->putFile($fileName, $file);
+
+                    // Create a record in your sales_payment_images table with the WebP file path.
+                    \App\Models\Sales\SalesPaymentImages::create([
+                        'sales_payment_id' => $sales_payment->id,
+                        'sales_order_id'   => $order->id,
+                        'image'            => $fileName,
+                    ]);
+                }
+            }
+            
         });
 
         return redirect()->route('point_of_sales.index')->with('success', 'Order created successfully.');

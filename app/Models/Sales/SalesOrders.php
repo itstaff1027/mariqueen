@@ -20,6 +20,8 @@ class SalesOrders extends Model
         'status',
         'total_amount',
         'grand_amount',
+        'balance',
+        'excess',
         'user_id',
         'remarks'
     ];
