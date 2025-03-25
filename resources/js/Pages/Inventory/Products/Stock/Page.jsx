@@ -13,7 +13,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
 
     const filteredProducts = products.filter(stock => {
         // Compute overall quantity
-        const overallQty = stock.total_purchased - stock.total_sold;
+        const overallQty = parseInt(stock.total_purchased - (- stock.total_sold));
 
         // Check quantity filter
         let qtyMatches = true;
@@ -49,14 +49,14 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
     // Existing export to Excel function remains unchanged (if needed)
     const handleExportExcel = () => {
         const exportData = filteredProducts.map(product => ({
-            SKU: product.product_variant.sku,
-            Design: product.product_variant.product.product_name,
-            Color: product.product_variant.colors.color_name,
-            Size: product.product_variant.sizes.size_name,
-            SizeValues: product.product_variant.size_values.size_values,
-            HeelHeight: product.product_variant.heel_heights.value,
-            Category: product.product_variant.categories.category_name,
-            OverallQty: product.total_purchased - product.total_sold,
+            SKU: product.sku,
+            Design: product.product.product_name,
+            Color: product.colors.color_name,
+            Size: product.sizes.size_name,
+            SizeValues: product.size_values.size_values,
+            HeelHeight: product.heel_heights.value,
+            Category: product.categories.category_name,
+            OverallQty: parseInt(product.total_purchased - (- product.total_sold)),
         }));
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
