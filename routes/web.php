@@ -93,6 +93,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/sales_orders/update/status/{id}', [SalesOrderController::class, 'update_status'])->name('sales_orders.update_status');
 
     Route::resource('/sales_payments', SalesPaymentController::class);
+    Route::post('/sales_payment/upload/images', [SalesPaymentController::class, 'upload_new_images']);
+    Route::post('/sales_payment/destroy/image', [SalesPaymentController::class, 'destroy_image']);
+
     Route::get('/sales_order/{id}', [SalesPaymentController::class, 'get_sales_order']);
     // Route::resource('/sales_payments', SalesPaymentController::class);
 });

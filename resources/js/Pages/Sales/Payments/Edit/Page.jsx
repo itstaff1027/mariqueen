@@ -1,30 +1,88 @@
-import React from 'react';
-import { useForm } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { useForm, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 
-const EditCustomers = ({ customer }) => {
+const EditSalesPayments = ({ sales_payment, payment_methods }) => {
     const { data, setData, put, errors } = useForm({
-        first_name: customer.first_name || '',
-        last_name: customer.last_name || '',
-        email: customer.email || '',
-        phone: customer.phone || '',
-        address: customer.address || '',
-        receiver_name: customer.receiver_name || '',
-    });
+        sales_payment_id: sales_payment.id || '',
+        order_number: sales_payment.sales_order.order_number || '',
+        payment_method_id: sales_payment.payment_method_id || '',
+        status: sales_payment.status || '',
+        client_payment_amount: sales_payment.amount_paid || '',
+        grand_total: sales_payment.sales_order.grand_amount || '',
+        remarks: sales_payment.remarks || '',
+        payment_images: Array.isArray(sales_payment.payment_images) ? sales_payment.payment_images : [],
+    }); 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/customers/${customer.id}`);
+        put(`/sales_payments/${sales_payment.id}`);
     };
 
+    useEffect(() => {
+        console.log(sales_payment);
+        console.log(data.payment_images)
+    }, []);
+
+    // Create a separate local state to manage image changes temporarily.
+    const [localImages, setLocalImages] = useState(data.payment_images);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    
+
+    useEffect(() => {
+        console.log("Sales Payment:", sales_payment.id);
+        console.log("Local Images:", localImages);
+
+    }, [sales_payment, localImages]);
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setSelectedFiles(files);
+    };
+    
+    const removeFile = (indexToRemove) => {
+        // Filter out the file at the specified index
+        const updatedFiles = selectedFiles.filter((_, index) => index !== indexToRemove);
+        setSelectedFiles(updatedFiles);
+    };
+
+    const submitNewImages = (e) => {
+        // console.log(data);
+        router.post(
+            `/sales_payment/upload/images`,
+            { 
+                data: {
+                    sales_payment_id: sales_payment.id,
+                    new_images: selectedFiles
+                } 
+            },
+            { preserveState: true },
+        );
+    }
+
+    const destroyImage = (payment_image_id) => {
+        // console.log(data);
+        // e.preventDefault();
+        // console.log(payment_image_id)
+        router.post(
+            `/sales_payment/destroy/image`,
+            {
+                payment_image_id: payment_image_id,
+                sales_payment_id: sales_payment.id,
+            },
+            { preserveState: true },
+        );
+    }
+      
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Edit Customers
+                    Edit sales_payments
                 </h2>
             }
         >
@@ -32,89 +90,245 @@ const EditCustomers = ({ customer }) => {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <form onSubmit={handleSubmit}>
+                            <div>
                                 {/* Name Input Field */}
                                 <div className="mb-6">
-                                    <InputLabel for="first_name" value="Customers First Name" />
-                                    <TextInput
-                                        id="first_name"
-                                        name="first_name"
-                                        value={data.first_name}
-                                        onChange={(e) => setData('first_name', e.target.value)}
-                                        className="w-full"
+                                    <InputLabel
+                                        for="order_number"
+                                        value="sales_payments - Order Number"
                                     />
-                                    <InputError message={errors.first_name} />
+                                    <TextInput
+                                        id="order_number"
+                                        name="order_number"
+                                        value={data.order_number}
+                                        onChange={(e) =>
+                                            setData(
+                                                'order_number',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full"
+                                        disabled
+                                    />
+                                    <InputError message={errors.order_number} />
                                 </div>
 
                                 <div className="mb-6">
-                                    <InputLabel for="last_name" value="Customers Last Name" />
-                                    <TextInput
-                                        id="last_name"
-                                        name="last_name"
-                                        value={data.last_name}
-                                        onChange={(e) => setData('last_name', e.target.value)}
-                                        className="w-full"
+                                    <InputLabel
+                                        for="paymenet_method_id"
+                                        value="sales_payments - Payment Method"
                                     />
-                                    <InputError message={errors.last_name} />
+                                    <select
+                                        id="payment_method_id"
+                                        value={data.payment_method_id}
+                                        onChange={(e) =>
+                                            setData(
+                                                'payment_method_id',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full rounded border p-2"
+                                    >
+                                        <option value="">
+                                            Select Payment Method
+                                        </option>
+                                        {payment_methods.map((method) => (
+                                            <option
+                                                key={method.id}
+                                                value={method.id}
+                                            >
+                                                {method.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <InputError
+                                        message={errors.payment_method_id}
+                                    />
                                 </div>
 
                                 <div className="mb-6">
-                                    <InputLabel for="email" value="Customers Email" />
-                                    <TextInput
-                                        id="email"
-                                        name="email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
-                                        className="w-full"
+                                    <InputLabel
+                                        for="status"
+                                        value="sales_payment - Status"
                                     />
-                                    <InputError message={errors.email} />
+                                    <select
+                                        id="status"
+                                        value={data.status}
+                                        onChange={(e) =>
+                                            setData('status', e.target.value)
+                                        }
+                                        className="w-full rounded border p-2"
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="partial">Partial</option>
+                                    </select>
+                                    <InputError message={errors.status} />
                                 </div>
 
                                 <div className="mb-6">
-                                    <InputLabel for="phone" value="Customers Phone" />
-                                    <TextInput
-                                        id="phone"
-                                        name="phone"
-                                        value={data.phone}
-                                        onChange={(e) => setData('phone', e.target.value)}
-                                        className="w-full"
+                                    <InputLabel
+                                        for="client_payment_amount"
+                                        value="sales_payments - client_payment_amount"
                                     />
-                                    <InputError message={errors.phone} />
+                                    <TextInput
+                                        id="client_payment_amount"
+                                        name="client_payment_amount"
+                                        value={data.client_payment_amount}
+                                        onChange={(e) =>
+                                            setData(
+                                                'client_payment_amount',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full"
+                                        disabled
+                                    />
+                                    <InputError
+                                        message={errors.client_payment_amount}
+                                    />
                                 </div>
 
                                 <div className="mb-6">
-                                    <InputLabel for="address" value="Customers Address" />
-                                    <TextInput
-                                        id="address"
-                                        name="address"
-                                        value={data.address}
-                                        onChange={(e) => setData('address', e.target.value)}
-                                        className="w-full"
+                                    <InputLabel
+                                        for="grand_total"
+                                        value="sales_payments - grand_total"
                                     />
-                                    <InputError message={errors.address} />
+                                    <TextInput
+                                        id="grand_total"
+                                        name="grand_total"
+                                        value={data.grand_total}
+                                        onChange={(e) =>
+                                            setData(
+                                                'grand_total',
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="w-full"
+                                        disabled
+                                    />
+                                    <InputError message={errors.grand_total} />
                                 </div>
 
                                 {/* value Input Field */}
                                 <div className="mb-6">
-                                    <InputLabel for="receiver_name" value="Receiver Name" />
+                                    <InputLabel
+                                        for="remarks"
+                                        value="sales_payments - Remarks"
+                                    />
                                     <TextInput
-                                        id="receiver_name"
-                                        name="receiver_name"
+                                        id="remarks"
+                                        name="remarks"
                                         type="text"
-                                        value={data.receiver_name}
-                                        onChange={(e) => setData('receiver_name', e.target.value)}
+                                        value={data.remarks}
+                                        onChange={(e) =>
+                                            setData('remarks', e.target.value)
+                                        }
                                         className="w-full"
                                     />
-                                    <InputError message={errors.receiver_name} />
+                                    <InputError message={errors.remarks} />
+                                </div>
+
+                                <div className="p-4">
+                                    {/* Thumbnail Grid */}
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {sales_payment.payment_images.map((img, index) => (
+                                            <div key={index} className="relative">
+                                                <img
+                                                    src={`/storage/${img.image}`}
+                                                    alt="Payment"
+                                                    className="w-full h-24 object-cover rounded cursor-pointer"
+                                                    onClick={() => setSelectedImage(img)}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (window.confirm("Are you sure you want to remove this image?")) {
+                                                        destroyImage(img.id);
+                                                        }
+                                                    }}
+                                                    className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Preview Modal */}
+                                    {selectedImage && (
+                                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+                                            <div className="relative">
+                                                <img
+                                                    src={`/storage/${selectedImage.image}`}
+                                                    alt="Preview"
+                                                    className="max-h-full max-w-full rounded"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedImage(null)}
+                                                    className="absolute top-2 right-2 bg-white text-black px-2 py-1 rounded"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                
+                                <div>
+                                    <h1 className="text-2xl font-bold mb-4">Upload Payment Images (Multiple Allowed)</h1>
+                                    <input
+                                        type="file"
+                                        name="new_images"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="border p-2 rounded"
+                                    />
+                                    {errors.new_images && (
+                                        <div className="text-red-500 mt-2">{errors.new_images}</div>
+                                    )}
+
+                                    {selectedFiles.length > 0 && (
+                                        <div className="mt-4">
+                                            <h2 className="text-lg font-bold">Selected Files:</h2>
+                                            <ul className="list-disc list-inside">
+                                                {selectedFiles.map((file, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="text-gray-700 flex items-center justify-between"
+                                                    >
+                                                        {file.name}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeFile(index)}
+                                                            className="text-red-500 ml-2"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={submitNewImages}
+                                        type="submit"
+                                        className="focus:shadow-outline rounded bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-700 focus:outline-none"
+                                    >
+                                        Upload New Images
+                                    </button>
                                 </div>
 
                                 <button
+                                    onClick={handleSubmit}
                                     type="submit"
-                                    className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    className="focus:shadow-outline rounded bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-700 focus:outline-none"
                                 >
-                                    Edit Customers
+                                    Edit sales_payments
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,4 +337,4 @@ const EditCustomers = ({ customer }) => {
     );
 };
 
-export default EditCustomers;
+export default EditSalesPayments;

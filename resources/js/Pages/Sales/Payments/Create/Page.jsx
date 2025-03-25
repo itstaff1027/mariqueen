@@ -16,13 +16,16 @@ const CreatedSalesPayment = ({ sales_orders, payment_methods }) => {
         payment_amount: '',          // client amount paid
         grand_total: 0,              // grand total from selected sales order
         balance: 0,                  // computed as payment_amount - grand_total
-        remarks: ''
+        remarks: '',
+        type_purpose: 'Balance',
+        images: []
     });
 
     // State for order search and controlling dropdown visibility
     const [orderSearch, setOrderSearch] = useState("");
     const [showOrderDropdown, setShowOrderDropdown] = useState(false);
     const [salesOrder, setSalesOrder] = useState(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
 
     // Update balance whenever payment_amount or grand_total changes.
     // useEffect(() => {
@@ -55,10 +58,16 @@ const CreatedSalesPayment = ({ sales_orders, payment_methods }) => {
             });
     };
 
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setData('images', files);
+        setSelectedFiles(files);
+    };
+
     const createPayment = (e) => {
         e.preventDefault();
         console.log(data);
-        post(`/sales_order`);
+        post(`/sales_payments`);
     };
 
     return (
@@ -151,6 +160,23 @@ const CreatedSalesPayment = ({ sales_orders, payment_methods }) => {
                             <InputError message={errors.status} />
                         </div>
 
+                        <div className="mb-6">
+                            <InputLabel for="type_purpose" value="Purpose" />
+                            <select
+                                id="type_purpose"
+                                value={data.type_purpose}
+                                onChange={(e) =>
+                                    setData('type_purpose', e.target.value)
+                                }
+                                className="w-full rounded border p-2"
+                            >
+                                <option value="">Select purpose</option>
+                                <option value="balance">Balance</option>
+                                <option value="additional">Additional</option>
+                            </select>
+                            <InputError message={errors.type_purpose} />
+                        </div>
+
                         {/* Client Payment Amount */}
                         <div className="mb-6">
                             <InputLabel
@@ -201,6 +227,29 @@ const CreatedSalesPayment = ({ sales_orders, payment_methods }) => {
                                 value={data.remarks}
                                 onChange={(e) => setData('remarks', e.target.value)}
                             />
+                        </div>
+
+                        <div>
+                            <h1 className="text-2xl font-bold mb-4">Upload Payment Images (Multiple Allowed)</h1>
+                            <input
+                                type="file"
+                                name="images"
+                                multiple
+                                onChange={handleFileChange}
+                                className="border p-2 rounded"
+                            />
+                            {errors.images && <div className="text-red-500 mt-2">{errors.images}</div>}
+
+                            {selectedFiles.length > 0 && (
+                                <div className="mt-4">
+                                    <h2 className="text-lg font-bold">Selected Files:</h2>
+                                    <ul className="list-disc list-inside">
+                                        {selectedFiles.map((file, index) => (
+                                            <li key={index} className="text-gray-700">{file.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
                         <button

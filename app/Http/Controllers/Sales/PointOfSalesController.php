@@ -138,7 +138,7 @@ class PointOfSalesController extends Controller
             'shipping_cost' => 'required|numeric|min:1',
             'rush_order_fee' => 'nullable|string',
             'total_amount' => 'required|numeric|min:1',
-            // 'payment_amount' => 'nullable|string',
+            'payment_amount' => 'required|string',
             'grand_total' => 'required|numeric|min:1',
             // 'discount_id' => 'nullable|exists:discounts,id',
             'remarks' => 'nullable|string',
@@ -167,7 +167,8 @@ class PointOfSalesController extends Controller
                 'rush_order_fee' => $request->rush_order_fee ? $request->rush_order_fee : 0,
                 'total_amount' => $request->total_amount,   // from your business logic
                 'grand_amount' => $request->grand_total,   // after discounts, fees, etc.
-                'balance' => $request->payment_amount === 0 || $request->payment_amount < $request->grand_total ? $request->grand_total - $request->payment_amount : $request->payment_amount,
+                'balance' => $request->payment_amount === 0 || $request->payment_amount < $request->grand_total ? $request->grand_total - $request->payment_amount : 0,
+                'excess' => $request->payment_amount > $request->grand_total ? $request->payment_amount - $request->grand_total : 0,
                 'status' => 'pending',
                 'remarks' => $request->remarks,
                 'user_id' => auth()->id(),
@@ -238,16 +239,16 @@ class PointOfSalesController extends Controller
                     // $image->encode('webp', 80);
 
                     // // Generate a unique file name. You might want to use order id, timestamp, and uniqid.
-                    $fileName = 'payment_images/' . $order->id;
+                    $fileName = 'payment_images/' . $order->order_number;
 
                     // Save the image to the "public" disk (ensure you have run `php artisan storage:link`)
-                    Storage::disk('public')->putFile($fileName, $file);
+                    $file_path = Storage::disk('public')->putFile($fileName, $file);
 
                     // Create a record in your sales_payment_images table with the WebP file path.
                     \App\Models\Sales\SalesPaymentImages::create([
                         'sales_payment_id' => $sales_payment->id,
                         'sales_order_id'   => $order->id,
-                        'image'            => $fileName,
+                        'image'            => $file_path,
                     ]);
                 }
             }
