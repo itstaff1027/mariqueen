@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Admin\AuthorizedRoles;
+use App\Models\Admin\AuthorizedRoutes;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -25,5 +27,9 @@ class Role extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_role');
+    }
+
+    public function routes(){
+        return $this->hasMany(AuthorizedRoles::class, 'role_id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Admin\AuthorizedRoles;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,4 +58,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Warehouse::class, 'user_warehouse', 'user_id', 'warehouse_id');
     }
+
+    // For allowedRoutes, if you want to compute them from user roles, you can do one of two things:
+    public function allowedRoutes()
+    {
+        return $this->hasMany(AuthorizedRoles::class, 'role_id'); 
+    }
+
 }

@@ -8,7 +8,9 @@ import AuthenticatedLayout from './AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 
 export default function InventoryLayout({ header, children }) {
-    
+    const { auth } = usePage().props;
+    const user = auth.user;
+    const allowedRoutes = user.allowed_routes || [];
     const paths = [
         {
             'id': '0',
@@ -52,6 +54,13 @@ export default function InventoryLayout({ header, children }) {
         // }
         
     ];
+
+    const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);
+
+    // Then filter your paths:
+    const filteredPaths = allowedRouteNames.length > 0 
+        ? paths.filter((path) => allowedRouteNames.includes(path.route))
+        : paths;
 
     return (
         <AuthenticatedLayout

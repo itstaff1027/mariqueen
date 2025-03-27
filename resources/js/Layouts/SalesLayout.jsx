@@ -8,7 +8,9 @@ import AuthenticatedLayout from './AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 
 export default function SalesLayout({ header, children }) {
-    
+    const { auth } = usePage().props;
+    const user = auth.user;
+    const allowedRoutes = user.allowed_routes || [];
     const paths = [
         {
             'id': '0',
@@ -27,11 +29,6 @@ export default function SalesLayout({ header, children }) {
         },
         {
             'id': '3',
-            'name': 'Discounts',
-            'route': 'discounts.index'
-        },
-        {
-            'id': '4',
             'name': 'Sales Payments',
             'route': 'sales_payments.index'
         },
@@ -48,6 +45,13 @@ export default function SalesLayout({ header, children }) {
         
     ];
 
+    const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);
+
+    // Then filter your paths:
+    const filteredPaths = allowedRouteNames.length > 0 
+        ? paths.filter((path) => allowedRouteNames.includes(path.route))
+        : paths;
+
     return (
         <AuthenticatedLayout
             header={
@@ -63,7 +67,7 @@ export default function SalesLayout({ header, children }) {
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
                             <div className="flex flex-wrap gap-3 justify-center sm:justify-start p-4">
-                                {paths.map((path, i) => (
+                                {filteredPaths.map((path, i) => (
                                     <ResponsiveNavLink 
                                         href={route(`${path.route}`)}
                                         active={route().current(`${path.route}`)}

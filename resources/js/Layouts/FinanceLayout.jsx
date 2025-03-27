@@ -25,6 +25,11 @@ export default function FinanceLayout({ header, children }) {
             'name': 'Sales Orders',
             'route': 'finance_orders.index'
         },
+        {
+            'id': '3',
+            'name': 'Discounts',
+            'route': 'discounts.index'
+        },
         // {
         //     'id': '3',
         //     'name': 'Warehouse',

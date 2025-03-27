@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserRoutesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
@@ -65,4 +66,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('/admin-panel', AdminController::class);
     Route::resource('/admin-permissions', PermissionsController::class);
     Route::resource('/admin-users', UserController::class);
+    Route::resource('/admin-routes', UserRoutesController::class);
 });

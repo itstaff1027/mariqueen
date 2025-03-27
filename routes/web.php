@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/settings_colors', ColorController::class);
     Route::resource('/settings_categories', CategoryController::class);
     Route::resource('/settings_heel-heights', HeelHeightController::class);
@@ -53,7 +53,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/inventory/products', ProductsController::class);
     Route::post('/inventory/products/variants', [ProductsController::class, 'store_variants']);
     Route::get('/inventory/product/variant/{id}', [ProductsController::class, 'show_product_variant']);
@@ -83,9 +83,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/inventory_orders/update/status/{id}', [InventoryOrderController::class, 'update_status'])->name('inventory_orders.update_status');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/customers', CustomersController::class);
-    Route::resource('/discounts', DiscountsController::class);
 
     Route::resource('/point_of_sales', PointOfSalesController::class);
 
@@ -100,36 +99,36 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Route::resource('/sales_payments', SalesPaymentController::class);
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/payment_methods', PaymentMethodsController::class);
-
+    Route::resource('/discounts', DiscountsController::class);
     Route::resource('/finance_orders', FinanceOrdersController::class);
     Route::post('/finance_orders/update/status/{id}', [FinanceOrdersController::class, 'update_status'])->name('finance_orders.update_status');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/couriers', CouriersController::class);
 
     Route::resource('/logistics_orders', LogisticsOrderController::class);
     Route::post('/logistics_orders/update/status/{id}', [LogisticsOrderController::class, 'update_status'])->name('logistics_orders.update_status');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function (){
+Route::middleware(['route.authorization'])->group(function (){
     Route::get('/settings', function () {
         return Inertia:: render('Settings/Page');
     })->name('settings');
     Route::get('/inventory', function () {
         return Inertia:: render('Inventory/Page');
     })->name('inventory');
-    Route::get('/sales', function () {
-        return Inertia:: render('Sales/Page');
-    })->name('sales');
     Route::get('/finance', function () {
         return Inertia:: render('Finance/Page');
     })->name('finance');
     Route::get('/logistics', function () {
         return Inertia:: render('Logistics/Page');
     })->name('logistics');
+    Route::get('/sales', function () {
+        return Inertia:: render('Sales/Page');
+    })->name('sales');
 });
 
 require __DIR__.'/auth.php';

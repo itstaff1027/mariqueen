@@ -13,6 +13,8 @@ const Inventory= ({ sizes }) => {
             }
         >
             Inventory
+            <h1>Printable Square</h1>
+            <h1>Printalbe/Exportable List of Sale a Day for a master list </h1>
         </InventoryLayout>
     );
 };
