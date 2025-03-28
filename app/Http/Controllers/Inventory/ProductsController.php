@@ -16,11 +16,66 @@ use App\Http\Controllers\Controller;
 
 class ProductsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all();
+        $query = Product::with([
+            'colors',
+            'sizes',
+            'size_values',
+            'heelHeights',
+            'categories',
+            'variants'
+        ]);
+        
+        if ($request->filled('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('category_id', $request->category);
+            });
+        }
+        
+        if ($request->filled('size')) {
+            $query->whereHas('sizes', function ($q) use ($request) {
+                $q->where('size_id', $request->size);
+            });
+        }
+        
+        if ($request->filled('size_value')) {
+            $query->whereHas('size_values', function ($q) use ($request) {
+                $q->where('size_value_id', $request->size_value);
+            });
+        }
+        
+        if ($request->filled('heel_height')) {
+            $query->whereHas('heelHeights', function ($q) use ($request) {
+                $q->where('heel_height_id', $request->heel_height);
+            });
+        }
+        
+        if ($request->filled('color')) {
+            $query->whereHas('colors', function ($q) use ($request) {
+                $q->where('color_id', $request->color);
+            });
+        }
+        
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('product_name', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $products = $query->paginate(15)->withQueryString();
+
+        // dd($products);
+
         return inertia('Inventory/Products/Page', [
             'products' => $products,
+            'colors' => Color::all(),
+            'sizes' => Size::all(),
+            'size_values' => SizeValues::all(),
+            'heel_heights' => HeelHeight::all(),
+            'categories' => Categories::all(),
         ]);
     }
 

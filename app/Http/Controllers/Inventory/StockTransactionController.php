@@ -17,9 +17,39 @@ class StockTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = StockTransactions::all();
+        $query = StockTransactions::OrderBy('created_at', 'desc');
+
+        if($request->filled('fromWarehouse')){
+            $query->where('from_warehouse_id', $request->fromWarehouse);
+        }
+        if($request->filled('toWarehouse')){
+            $query->where('to_warehouse_id', $request->toWarehouse);
+        }
+        if($request->filled('transactionType')){
+            $query->where('transaction_type', $request->transactionType);
+        }
+        if($request->filled('status')){
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('fromDate')) {
+            $query->whereDate('created_at', '>=', $request->fromDate);
+        }
+        if ($request->filled('toDate')) {
+            $query->whereDate('created_at', '<=', $request->toDate);
+        }
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('id', '=', "{$searchTerm}");
+            });
+        }
+
+        $transactions = $query->paginate(15)->withQueryString();
+
         $warehouses = Warehouse::all();
         return inertia('Inventory/Products/Stock/Transactions/Page', [
             'stock_transactions' => $transactions,

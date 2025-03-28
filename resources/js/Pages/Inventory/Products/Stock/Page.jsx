@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
@@ -9,46 +9,29 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
     const [sizeValue, setSizeValues] = useState("");
     const [heelHeight, setHeelHeights] = useState("");
     const [category, setCategory] = useState("");
-    const [qtyFilter, setQtyFilter] = useState("all"); // New state for quantity filter
+    const [qtyFilter, setQtyFilter] = useState("all");
 
-    const filteredProducts = products.filter(stock => {
-        // Compute overall quantity
-        const overallQty = parseInt(stock.total_purchased - (- stock.total_sold));
+    const handleFilter = () => {
+        // Trigger a new request with the filter parameters
+        router.visit('/inventory/stocks', {
+            method: 'get',
+            data: {
+                category,
+                size,
+                size_value: sizeValue,
+                heel_height: heelHeight,
+                color,
+                qty: qtyFilter,
+                search,
+            },
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
-        // Check quantity filter
-        let qtyMatches = true;
-        if (qtyFilter === "positive") {
-            qtyMatches = overallQty > 0;
-        } else if (qtyFilter === "zero") {
-            qtyMatches = overallQty === 0;
-        } else if (qtyFilter === "negative") {
-            qtyMatches = overallQty < 0;
-        }
-
-        // Other filters
-        const matchesFilters = (
-            (!category || stock.category_id === parseInt(category)) &&
-            (!size || stock.size_id === parseInt(size)) &&
-            (!sizeValue || stock.size_value_id === parseInt(sizeValue)) &&
-            (!heelHeight || stock.heel_height_id === parseInt(heelHeight)) &&
-            (!color || stock.color_id === parseInt(color))
-        );
-
-        const matchesSearch = search === "" ||
-            stock.sku.toLowerCase().includes(search.toLowerCase()) ||
-            stock.colors.color_name.toLowerCase().includes(search.toLowerCase()) ||
-            stock.categories.category_name.toLowerCase().includes(search.toLowerCase());
-
-        return matchesFilters && matchesSearch && qtyMatches;
-    });
-
-    useEffect(() => {
-        console.log(products);
-    }, [products]);
-
-    // Existing export to Excel function remains unchanged (if needed)
     const handleExportExcel = () => {
-        const exportData = filteredProducts.map(product => ({
+        // Export only the currently loaded (filtered & paginated) data
+        const exportData = products.data.map(product => ({
             SKU: product.sku,
             Design: product.product.product_name,
             Color: product.colors.color_name,
@@ -56,7 +39,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
             SizeValues: product.size_values.size_values,
             HeelHeight: product.heel_heights.value,
             Category: product.categories.category_name,
-            OverallQty: parseInt(product.total_purchased - (- product.total_sold)),
+            OverallQty: parseInt(product.total_purchased - (-product.total_sold)),
         }));
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         const workbook = XLSX.utils.book_new();
@@ -78,9 +61,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                         <div className="p-6">
                             <div className="container mx-auto p-6">
                                 <div className="mb-6 flex items-center justify-between">
-                                    <h1 className="text-2xl font-bold">
-                                        Product Variants
-                                    </h1>
+                                    <h1 className="text-2xl font-bold">Product Variants</h1>
                                     <div className="flex gap-2">
                                         <Link
                                             href="/inventory/stock/transactions"
@@ -96,6 +77,7 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                         </button>
                                     </div>
                                 </div>
+                                {/* Filters */}
                                 <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                                     <select
                                         value={category || ''}
@@ -162,7 +144,6 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                         ))}
                                     </select>
 
-                                    {/* New Quantity Filter Dropdown */}
                                     <select
                                         value={qtyFilter}
                                         className="rounded-md border p-2 shadow-sm focus:outline-none"
@@ -175,47 +156,41 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                     </select>
                                 </div>
 
-                                <input
-                                    type="text"
-                                    placeholder="Search for a product..."
-                                    className="w-full rounded-md border p-2"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                                <div className="flex items-center gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Search for a product..."
+                                        className="w-full rounded-md border p-2"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                    <button
+                                        onClick={handleFilter}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                    >
+                                        Filter
+                                    </button>
+                                </div>
+
+                                {/* Table */}
                                 <table className="w-full table-auto border-collapse border border-gray-300 text-center mt-4">
                                     <thead>
                                         <tr className="bg-gray-100">
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Product SKU
-                                            </th>
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Overall Qty
-                                            </th>
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Heel Height
-                                            </th>
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Size
-                                            </th>
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Size Values
-                                            </th>
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Category
-                                            </th>
-                                            <th className="border border-gray-300 px-4 py-2">
-                                                Action
-                                            </th>
+                                            <th className="border border-gray-300 px-4 py-2">Product SKU</th>
+                                            <th className="border border-gray-300 px-4 py-2">Overall Qty</th>
+                                            <th className="border border-gray-300 px-4 py-2">Heel Height</th>
+                                            <th className="border border-gray-300 px-4 py-2">Size</th>
+                                            <th className="border border-gray-300 px-4 py-2">Size Values</th>
+                                            <th className="border border-gray-300 px-4 py-2">Category</th>
+                                            <th className="border border-gray-300 px-4 py-2">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredProducts.map((product) => (
+                                        {products.data.map((product) => (
                                             <tr key={product.id}>
+                                                <td className="border border-gray-300 px-4 py-2">{product.sku}</td>
                                                 <td className="border border-gray-300 px-4 py-2">
-                                                    {product.sku}
-                                                </td>
-                                                <td className="border border-gray-300 px-4 py-2">
-                                                    {(product.total_purchased - ( - product.total_sold))}
+                                                    {(product.total_purchased - (-product.total_sold))}
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2">
                                                     {product.heel_heights.value}
@@ -241,6 +216,29 @@ const ProductVariantList = ({ products, colors, sizes, size_values, heel_heights
                                         ))}
                                     </tbody>
                                 </table>
+
+                                {/* Pagination */}
+                                {products.links && (
+                                    <div className="mt-4 flex justify-center">
+                                        {products.links.map((link, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => {
+                                                    if (link.url) {
+                                                        router.visit(link.url, {
+                                                            preserveState: true,
+                                                            preserveScroll: true,
+                                                        });
+                                                    }
+                                                }}
+                                                className={`mx-1 px-3 py-1 border rounded ${
+                                                    link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+                                                }`}
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            ></button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

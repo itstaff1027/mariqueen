@@ -2,7 +2,10 @@
 
 namespace App\Models\Sales;
 
+use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\StockMovements;
+use App\Models\Logistics\Couriers;
 use Illuminate\Database\Eloquent\Model;
 
 class SalesOrders extends Model
@@ -40,6 +43,18 @@ class SalesOrders extends Model
 
     public function items(){
         return $this->hasMany(SalesOrderItems::class, 'sales_order_id');
+    }
+
+    public function warehouse(){
+        return $this->belongsTO(Warehouse::class, 'warehouse_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function courier(){
+        return $this->belongsTo(Couriers::class, 'courier_id');
     }
 
     public function stockMovements(){

@@ -30,7 +30,7 @@ export default function AuthenticatedLayout({ header, children }) {
     ];
     useEffect(() => {
         // console.log(user.allowed_routes);
-        // console.log('allowedRoutes:', user);
+        console.log('allowedRoutes:', user);
     }, [])
 
 

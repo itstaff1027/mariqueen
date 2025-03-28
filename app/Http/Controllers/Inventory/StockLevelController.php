@@ -23,48 +23,87 @@ class StockLevelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $stocks = StockLevels::with(['productVariant', 'productVariant.product', 'product.colors', 'product.sizes', 'product.categories', 'product.heelHeights'])
-        // ->selectRaw('product_variant_id, SUM(quantity) as total_quantity')
-        // ->groupBy('product_variant_id')
-        // ->get();
+        $query = ProductVariant::query()
+            ->with([
+                'product',
+                'colors',
+                'sizes',
+                'size_values',
+                'heelHeights',
+                'categories',
+                'stockLevels',
+                'stockMovements'
+            ])
+            ->withSum(['stockMovements as total_purchased' => function ($query) {
+                $query->where('movement_type', 'purchase');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_sold' => function ($query) {
+                $query->where('movement_type', 'sale');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_transfer' => function ($query) {
+                $query->where('movement_type', 'transfer');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_return' => function ($query) {
+                $query->where('movement_type', 'return');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_adjustment' => function ($query) {
+                $query->where('movement_type', 'adjustment');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_correction' => function ($query) {
+                $query->where('movement_type', 'correction');
+            }], 'quantity')
+            ->withSum(['stockMovements as total_repair' => function ($query) {
+                $query->where('movement_type', 'repair');
+            }], 'quantity');
 
-        $products = ProductVariant::with([
-            'product',
-            'colors',
-            'sizes',
-            'size_values',
-            'heelHeights',
-            'categories',
-            'stockLevels',
-            'stockMovements'
-        ])
-        ->withSum(['stockMovements as total_purchased' => function ($query) {
-            $query->where('movement_type', 'purchase');
-        }], 'quantity')
-        ->withSum(['stockMovements as total_sold' => function ($query) {
-            $query->where('movement_type', 'sale');
-        }], 'quantity')
-        ->withSum(['stockMovements as total_transfer' => function ($query) {
-            $query->where('movement_type', 'transfer');
-        }], 'quantity')
-        ->withSum(['stockMovements as total_return' => function ($query) {
-            $query->where('movement_type', 'return');
-        }], 'quantity')
-        ->withSum(['stockMovements as total_adjustment' => function ($query) {
-            $query->where('movement_type', 'adjustment');
-        }], 'quantity')
-        ->withSum(['stockMovements as total_correction' => function ($query) {
-            $query->where('movement_type', 'correction');
-        }], 'quantity')
-        ->withSum(['stockMovements as total_repair' => function ($query) {
-            $query->where('movement_type', 'repair');
-        }], 'quantity')
-        ->get();
-        
-        
-        // dd($products);
+        // Filter by category, size, size_value, heel_height, and color if provided
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+        if ($request->filled('size')) {
+            $query->where('size_id', $request->size);
+        }
+        if ($request->filled('size_value')) {
+            $query->where('size_value_id', $request->size_value);
+        }
+        if ($request->filled('heel_height')) {
+            $query->where('heel_height_id', $request->heel_height);
+        }
+        if ($request->filled('color')) {
+            $query->where('color_id', $request->color);
+        }
+
+        // Apply search filter on SKU, color name, or category name
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('sku', 'like', "%{$searchTerm}%")
+                ->orWhereHas('colors', function ($q2) use ($searchTerm) {
+                    $q2->where('color_name', 'like', "%{$searchTerm}%");
+                })
+                ->orWhereHas('categories', function ($q3) use ($searchTerm) {
+                    $q3->where('category_name', 'like', "%{$searchTerm}%");
+                });
+            });
+        }
+
+        // Filter by overall quantity based on total_purchased and total_sold
+        // Assuming overall quantity = total_purchased - total_sold
+        if ($request->filled('qty') && $request->qty !== 'all') {
+            if ($request->qty === 'positive') {
+                $query->havingRaw('(COALESCE(total_purchased, 0) - COALESCE(- total_sold, 0)) > 0');
+            } elseif ($request->qty === 'zero') {
+                $query->havingRaw('(COALESCE(total_purchased, 0) - COALESCE(- total_sold, 0)) = 0');
+            } elseif ($request->qty === 'negative') {
+                $query->havingRaw('(COALESCE(total_purchased, 0) - COALESCE(total_sold, 0)) < 0');
+            }
+        }
+
+        // Paginate the results (15 per page) and preserve query string filters
+        $products = $query->paginate(15)->withQueryString();
+
         return inertia('Inventory/Products/Stock/Page', [
             'products' => $products,
             'colors' => Color::all(),
@@ -74,6 +113,7 @@ class StockLevelController extends Controller
             'categories' => Categories::all(),
         ]);
     }
+
 
     public function transfer_stocks()
     {

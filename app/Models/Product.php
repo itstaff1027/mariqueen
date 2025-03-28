@@ -38,4 +38,14 @@ class Product extends Model
     {
         return $this->belongsToMany(Categories::class, 'products_categories', 'product_id', 'category_id');
     }
+
+    public function variants(){
+        return $this->hasMany(ProductVariant::class, 'product_id');
+    }
+
+    
+    public function size_values()
+    {
+        return $this->belongsTo(SizeValues::class, 'size_value_id');
+    }
 }

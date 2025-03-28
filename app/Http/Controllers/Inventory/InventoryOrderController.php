@@ -12,14 +12,61 @@ class InventoryOrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $sales_orders = SalesOrders::with([
+        $query = SalesOrders::with([
             'customers',
             'payments',
-        ])
-        ->orderBy('created_at', 'desc')->whereIn('status' , ['paid', 'preparing'])->get();
+            'courier',
+            'warehouse',
+            'user',
+            'items',
+            'items.productVariant',
+            'items.productVariant.product',
+            'items.productVariant.colors',
+            'items.productVariant.size_values',
+            'items.productVariant.heelHeights'
+        ])->orderBy('created_at', 'desc')->whereIn('status' , ['paid', 'preparing', 'shipped', 'delivered']);
+
+        if($request->filled('customer_name')){
+            $query->whereHas('customer_name', function ($q) use ($request) {
+                $q->where('customer_id', $request->customer_id);
+            });
+        }
+
+        if($request->filled('trackingNumber')){
+            $query->where('tracking_number', $request->trackingNumber);
+        }
+
+        if($request->filled('status')){
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('fromDate')) {
+            $query->whereDate('created_at', '>=', $request->fromDate);
+        }
+        if ($request->filled('toDate')) {
+            $query->whereDate('created_at', '<=', $request->toDate);
+        }
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('order_number', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('tracking_number', 'LIKE', "%{$searchTerm}%")
+                ->orWhereHas('customers', function ($q2) use ($searchTerm){
+                    $q2->where('first_name', 'LIKE', $searchTerm);
+                })
+                ->orWhereHas('customers', function ($q3) use ($searchTerm){
+                    $q3->where('last_name', 'LIKE', $searchTerm);
+                });
+            });
+        }
+
+        $sales_orders = $query->paginate(15);
+
+        // dd($sales_orders);
         return inertia('Inventory/Orders/Page', [
             'sales_orders' => $sales_orders,
         ]);//
