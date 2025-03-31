@@ -42,11 +42,11 @@ export default function InventoryLayout({ header, children }) {
             'name': 'Sales Orders',
             'route': 'inventory_orders.index'
         },
-        // {
-        //     'id': '5',
-        //     'name': 'Order Types',
-        //     'route': 'create-order-types'
-        // },
+        {
+            'id': '5',
+            'name': 'Packaging Types',
+            'route': 'inventory_packaging_types.index'
+        },
         // {
         //     'id': '6',
         //     'name': 'Page Sections',

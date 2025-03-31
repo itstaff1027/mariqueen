@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Inventory\InventoryOrderController;
+use App\Http\Controllers\Inventory\PackagingTypeController;
 use App\Http\Controllers\Logistics\LogisticsOrderController;
 use App\Http\Controllers\Sales\SalesPaymentController;
 use Inertia\Inertia;
@@ -81,6 +82,8 @@ Route::middleware(['auth','route.authorization'])->group(function () {
 
     Route::resource('/inventory_orders', InventoryOrderController::class);
     Route::post('/inventory_orders/update/status/{id}', [InventoryOrderController::class, 'update_status'])->name('inventory_orders.update_status');
+
+    Route::resource('/inventory_packaging_types', PackagingTypeController::class);
 });
 
 Route::middleware(['auth','route.authorization'])->group(function () {
