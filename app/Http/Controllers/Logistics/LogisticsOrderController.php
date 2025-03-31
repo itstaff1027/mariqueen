@@ -56,7 +56,9 @@ class LogisticsOrderController extends Controller
             'items',
             'items.productVariant',
             'stockMovements',
-            'discounts'
+            'discounts',
+            'courier',
+            'packagingType'
         ])
         ->where('id', $id)
         ->first();

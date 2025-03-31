@@ -60,4 +60,8 @@ class SalesOrders extends Model
     public function stockMovements(){
         return $this->hasMany(StockMovements::class, 'sales_order_id');
     }
+
+    public function packagingType(){
+        return $this->belongsTo(PackagingTypes::class, 'packaging_type_id');
+    }
 }

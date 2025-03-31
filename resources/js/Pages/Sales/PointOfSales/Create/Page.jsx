@@ -16,7 +16,8 @@ const POS = ({
     couriers, 
     payment_methods,
     discounts,
-    customers
+    customers,
+    packaging_types
 }) => {
     
     const { data, setData, post, errors } = useForm({
@@ -34,6 +35,8 @@ const POS = ({
         remarks: '',
         fixed_discount: 0,
         customer_id: 0,
+        packaging_type_id: '',
+        shoulder_by: 'bragais',
         images: []
     });
     
@@ -275,6 +278,13 @@ const POS = ({
         const files = Array.from(e.target.files);
         setData('images', files);
         setSelectedFiles(files);
+    };
+
+    const removeFile = (indexToRemove) => {
+        // Filter out the file at the specified index
+        const updatedFiles = selectedFiles.filter((_, index) => index !== indexToRemove);
+        setSelectedFiles(updatedFiles);
+        setData('images', updatedFiles);
     };
 
     useEffect(() => {
@@ -570,9 +580,44 @@ const POS = ({
                                         setData('shipping_cost', e.target.value)
                                     }
                                 />
+
+                                <InputLabel
+                                    for="shoulder_by"
+                                    value="Shoulder By"
+                                />
+                                <select
+                                    className="w-full rounded-md border p-2"
+                                    value={data.shoulder_by}
+                                    onChange={(e) =>
+                                        setData('shoulder_by', e.target.value)
+                                    }
+                                >
+                                    <option value='bragais'>Bragais</option>
+                                    <option value='client'>Client</option>
+                                </select>
                             </>
                         )}
                         <InputError message={errors.shipping_cost} />
+
+                        <InputLabel
+                            for="packaging_type_id"
+                            value="Packaging Type"
+                        />
+                        <select
+                            className="w-full rounded-md border p-2"
+                            value={data.packaging_type_id}
+                            onChange={(e) =>
+                                setData('packaging_type_id', e.target.value)
+                            }
+                        >
+                            <option value="">Select Packaging Type</option>
+                            {packaging_types.map((pt) => (
+                                <option key={pt.id} value={pt.id}>
+                                    {pt.packaging_name}
+                                </option>
+                            ))}
+                        </select>
+                        <InputError message={errors.packaging_type_id} />
 
                         <InputLabel
                             for="payment_method"
@@ -663,26 +708,40 @@ const POS = ({
                         </p>
 
                         <div>
-                            <h1 className="text-2xl font-bold mb-4">Upload Payment Images (Multiple Allowed)</h1>
-                            <input
-                                type="file"
-                                name="images"
-                                multiple
-                                onChange={handleFileChange}
-                                className="border p-2 rounded"
-                            />
-                            {errors.images && <div className="text-red-500 mt-2">{errors.images}</div>}
+                        <h1 className="text-2xl font-bold mb-4">Upload Payment Images (Multiple Allowed)</h1>
+                                    <input
+                                        type="file"
+                                        name="new_images"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="border p-2 rounded"
+                                    />
+                                    {errors.new_images && (
+                                        <div className="text-red-500 mt-2">{errors.new_images}</div>
+                                    )}
 
-                            {selectedFiles.length > 0 && (
-                                <div className="mt-4">
-                                    <h2 className="text-lg font-bold">Selected Files:</h2>
-                                    <ul className="list-disc list-inside">
-                                        {selectedFiles.map((file, index) => (
-                                            <li key={index} className="text-gray-700">{file.name}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
+                                    {selectedFiles.length > 0 && (
+                                        <div className="mt-4">
+                                            <h2 className="text-lg font-bold">Selected Files:</h2>
+                                            <ul className="list-disc list-inside">
+                                                {selectedFiles.map((file, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="text-gray-700 flex items-center justify-between"
+                                                    >
+                                                        {file.name}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeFile(index)}
+                                                            className="text-red-500 ml-2"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
                         </div>
                         <button
                             onClick={handleSubmit}

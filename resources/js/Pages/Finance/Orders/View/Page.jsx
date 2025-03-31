@@ -148,68 +148,19 @@ const SalesOrderView = ({ sales_order, user}) => {
                                             Order Date: {formatDate(sales_order.created_at)}
                                         </h1>
                                         <h1 className="w-full text-right text-3xl font-bold">
-                                            Status: {sales_order.status}
+                                            Status: {sales_order.status.toUpperCase()}
                                         </h1>
                                     </div>
 
-                                    <div className="w-full p-4">
-                                        <h2 className="mb-2 text-xl font-semibold">
-                                            Customer Information
-                                        </h2>
-                                        {sales_order.customers ? (
-                                            <div>
-                                                <p className="text-gray-700">
-                                                    {
-                                                        sales_order.customers
-                                                            .first_name
-                                                    }{' '}
-                                                    {
-                                                        sales_order.customers
-                                                            .last_name
-                                                    }
-                                                </p>
-                                                <p className="text-gray-700">
-                                                    Email:{' '}
-                                                    {
-                                                        sales_order.customers
-                                                            .email
-                                                    }
-                                                </p>
-                                                <p className="text-gray-700">
-                                                    Phone:{' '}
-                                                    {
-                                                        sales_order.customers
-                                                            .phone
-                                                    }
-                                                </p>
-                                                <p className="text-gray-700">
-                                                    Address:{' '}
-                                                    {
-                                                        sales_order.customers
-                                                            .address
-                                                    }
-                                                </p>
-                                                {sales_order.customers
-                                                    .receiver_name && (
-                                                    <p className="text-gray-700">
-                                                        Receiver:{' '}
-                                                        {
-                                                            sales_order
-                                                                .customers
-                                                                .receiver_name
-                                                        }
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <p className="text-gray-700">
-                                                No customer information
-                                                available.
-                                            </p>
-                                        )}
+                                    <div className="grid grid-cols-2 w-full">
+                                        <h1 className="text-2xl font-bold w-full text-left">Courier: <u>{sales_order.courier.name.toUpperCase()}</u></h1>
+                                        <h1 className="text-2xl font-bold w-full text-right">Packaging Type: <u>{sales_order.packaging_type?.packaging_name.toUpperCase()}</u></h1>
+                                    </div>
+                                    <div className="grid grid-cols-2 w-full">
+                                        <h1 className="text-2xl font-bold w-full text-left">Shoulder By: <u>{sales_order.shoulder_by.toUpperCase()}</u></h1>
                                     </div>
 
-                                    <div className="mb-8 w-full">
+                                    <div className="my-4 w-full">
                                         <h2 className="mb-2 text-xl font-semibold">
                                             Order Items
                                         </h2>
@@ -284,7 +235,12 @@ const SalesOrderView = ({ sales_order, user}) => {
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div className="mb-8 w-full">
+
+                                    <div className="w-full mb-4">
+                                        <p className="text-l font-bold w-full">Packaging Type Description: <u>{sales_order.packaging_type?.description}</u></p>
+                                    </div>
+
+                                    <div className="mb-4 w-full">
                                         <h2 className="mb-2 text-xl font-semibold">
                                             Payment Information
                                         </h2>
@@ -371,6 +327,63 @@ const SalesOrderView = ({ sales_order, user}) => {
                                                 )}
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    <div className="w-full p-4">
+                                        <h2 className="mb-2 text-xl font-semibold">
+                                            Customer Information
+                                        </h2>
+                                        {sales_order.customers ? (
+                                            <div>
+                                                <p className="text-gray-700">
+                                                    {
+                                                        sales_order.customers
+                                                            .first_name
+                                                    }{' '}
+                                                    {
+                                                        sales_order.customers
+                                                            .last_name
+                                                    }
+                                                </p>
+                                                <p className="text-gray-700">
+                                                    Email:{' '}
+                                                    {
+                                                        sales_order.customers
+                                                            .email
+                                                    }
+                                                </p>
+                                                <p className="text-gray-700">
+                                                    Phone:{' '}
+                                                    {
+                                                        sales_order.customers
+                                                            .phone
+                                                    }
+                                                </p>
+                                                <p className="text-gray-700">
+                                                    Address:{' '}
+                                                    {
+                                                        sales_order.customers
+                                                            .address
+                                                    }
+                                                </p>
+                                                {sales_order.customers
+                                                    .receiver_name && (
+                                                    <p className="text-gray-700">
+                                                        Receiver:{' '}
+                                                        {
+                                                            sales_order
+                                                                .customers
+                                                                .receiver_name
+                                                        }
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-700">
+                                                No customer information
+                                                available.
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="flex w-full flex-col items-end justify-end border-t pt-4">
                                         <h2 className="mb-2 text-xl font-semibold">

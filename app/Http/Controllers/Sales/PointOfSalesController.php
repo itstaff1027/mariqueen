@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Sales\SalesPayments;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Sales\PackagingTypes;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Sales\SalesOrderItems;
 use App\Models\Finance\PaymentMethods;
@@ -121,7 +122,8 @@ class PointOfSalesController extends Controller
             'couriers' => $couriers,
             'payment_methods' => $payment_methods,
             'discounts' => Discounts::all(),
-            'customers' => Customers::all()
+            'customers' => Customers::all(),
+            'packaging_types' => PackagingTypes::all()
         ]);
     }
 
@@ -273,7 +275,9 @@ class PointOfSalesController extends Controller
             'items',
             'items.productVariant',
             'stockMovements',
-            'discounts'
+            'discounts',
+            'courier',
+            'packagingType'
         ])
         ->where('id', $id)
         ->first();
@@ -295,7 +299,9 @@ class PointOfSalesController extends Controller
             'items',
             'items.productVariant',
             'stockMovements',
-            'discounts'
+            'discounts',
+            'courier',
+            'packagingType'
         ])
         ->where('id', $id)
         ->first();

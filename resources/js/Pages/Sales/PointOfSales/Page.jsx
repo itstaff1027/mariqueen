@@ -37,12 +37,6 @@ const SalesOrderList = ({ sales_orders }) => {
                                     >
                                         Create Order
                                     </Link>
-                                    {/* <Link
-                                        href="/sales_order/assign_sales_order"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Assign User to sales_order
-                                    </Link> */}
                                 </div>
                                 <table className="w-full table-auto border-collapse border border-gray-300">
                                     <thead>
