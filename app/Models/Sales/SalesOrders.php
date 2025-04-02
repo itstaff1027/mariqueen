@@ -26,7 +26,9 @@ class SalesOrders extends Model
         'balance',
         'excess',
         'user_id',
-        'remarks'
+        'remarks',
+        'packaging_type_id',
+        'shoulder_by'
     ];
 
     public function customers(){

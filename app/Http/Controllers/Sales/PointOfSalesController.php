@@ -144,7 +144,8 @@ class PointOfSalesController extends Controller
             'grand_total' => 'required|numeric|min:1',
             // 'discount_id' => 'nullable|exists:discounts,id',
             'remarks' => 'nullable|string',
-            'customer_id' => 'required|exists:customers,id'
+            'customer_id' => 'required|exists:customers,id',
+            'packaging_type_id' => 'required|exists:packaging_types,id'
         ]);
 
         // dd($request);
@@ -173,6 +174,8 @@ class PointOfSalesController extends Controller
                 'excess' => $request->payment_amount > $request->grand_total ? $request->payment_amount - $request->grand_total : 0,
                 'status' => 'pending',
                 'remarks' => $request->remarks,
+                'packaging_type_id' => $request->packaging_type_id,
+                'shoulder_by' => $request->shoulder_by,
                 'user_id' => auth()->id(),
             ]);
 
