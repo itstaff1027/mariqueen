@@ -47,6 +47,16 @@ class CustomersController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'receiver_name' => $request->receiver_name,
+            'social_media_account' => $request->social_media_account,
+            'gender' => $request->gender, 
+            'birthday'=> $request->birthday, 
+            'age' => $request->age, 
+            'region' => $request->region, 
+            'province' => $request->province, 
+            'city' => $request->city, 
+            'brgy' => $request->brgy, 
+            'street' => $request->street, 
+            'zip_code' => $request->zip_code
         ]);
         
         return redirect()->route('customers.index')->with('success', 'Customer created successfully.');
@@ -65,6 +75,7 @@ class CustomersController extends Controller
      */
     public function edit(string $id)
     {
+        // dd(Customers::findOrFail($id));
         return inertia('Sales/Customers/Edit/Page', [
             'customer' => Customers::findOrFail($id)
         ]);
@@ -92,6 +103,16 @@ class CustomersController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'receiver_name' => $request->receiver_name,
+            'social_media_account' => $request->social_media_account,
+            'gender' => $request->gender, 
+            'birthday'=> $request->birthday, 
+            'age' => $request->age, 
+            'region' => $request->region, 
+            'province' => $request->province, 
+            'city' => $request->city, 
+            'brgy' => $request->brgy, 
+            'street' => $request->street, 
+            'zip_code' => $request->zip_code
         ]);
         
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');

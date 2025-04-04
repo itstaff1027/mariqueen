@@ -11,14 +11,50 @@ use App\Http\Controllers\Controller;
 use App\Models\Finance\PaymentMethods;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Sales\SalesPaymentImages;
-use Illuminate\Container\Attributes\Auth;
+use Illuminate\Support\Facades\Auth;
 
 class SalesPaymentController extends Controller
 {
-    public function index(){
+    public function index(Request $request){
+        $user = Auth::user();
+        $query = SalesPayments::with(['paymentMethod', 'salesOrder', 'salesOrder.customers', 'paymentImages'])->orderBy('created_at', 'desc');
+        // Flatten all permissions from all roles into one collection
+        $permissions = $user->roles->flatMap(function ($role) {
+            return $role->permissions;
+        });
 
-        $sales_payments = SalesPayments::with(['paymentMethod', 'salesOrder', 'salesOrder.customers', 'paymentImages'])->orderBy('created_at', 'desc')->get();
-        // dd($sales_payments);
+        // Check if any permission has the name 'view'
+        $hasPermission = $permissions->contains(function ($permission) {
+            return $permission->name === 'view';
+        });
+
+        if($hasPermission) {
+            $query->where('user_id', $user->id);
+        }
+
+        
+        if ($request->filled('fromDate')) {
+            $query->whereDate('created_at', '>=', $request->fromDate);
+        }
+        if ($request->filled('toDate')) {
+            $query->whereDate('created_at', '<=', $request->toDate);
+        }
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('order_number', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('tracking_number', 'LIKE', "%{$searchTerm}%")
+                ->orWhereHas('customers', function ($q2) use ($searchTerm){
+                    $q2->where('first_name', 'LIKE', $searchTerm);
+                })
+                ->orWhereHas('customers', function ($q3) use ($searchTerm){
+                    $q3->where('last_name', 'LIKE', $searchTerm);
+                });
+            });
+        }
+
+        $sales_payments = $query->paginate(20);
         return inertia('Sales/Payments/Page', [
             'sales_payments' => $sales_payments,
         ]);

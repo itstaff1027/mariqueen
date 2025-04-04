@@ -18,6 +18,16 @@ class Customers extends Model
         'email',
         'phone',
         'address',
-        'receiver_name'
+        'receiver_name',
+        'social_media_account',
+        'gender', 
+        'birthday', 
+        'age', 
+        'region', 
+        'province', 
+        'city', 
+        'brgy', 
+        'street', 
+        'zip_code'
     ];
 }

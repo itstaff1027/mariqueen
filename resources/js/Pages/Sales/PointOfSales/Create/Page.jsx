@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { usePage, useForm } from "@inertiajs/react";
+import { usePage, useForm, Link } from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
 import { Textarea } from '@headlessui/react';
@@ -500,7 +500,12 @@ const POS = ({
                         </p>
 
                         <h1>KULANG NG FETCHING FOR PROMO, BUNDLES</h1>
-
+                        <Link
+                            href="/customers/create"
+                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                        >
+                            Create Order
+                        </Link>
                         <InputLabel for="customer" value="Customer" />
                         <div className="relative">
                             <input

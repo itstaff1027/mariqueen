@@ -3,13 +3,16 @@ import { Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 const SalesPaymentsList = ({ sales_payments }) => {
-
-    const destroy = (e, id) => {
-        e.preventDefault();
-
-        // if (confirm('Are you sure?')){
-        //     router.delete(`/sales_payments/${id}`);
-        // }
+    const [search, setSearch] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const handleFilter = () => {
+        router.visit('/point_of_sales', {
+        method: 'get',
+        data: { search, fromDate, toDate },
+        preserveState: true,
+        preserveScroll: true,
+        });
     };
 
     useEffect(() => {
@@ -46,6 +49,39 @@ const SalesPaymentsList = ({ sales_payments }) => {
                                         Assign User to sales_payment
                                     </Link> */}
                                 </div>
+                                <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                                <div>
+                                    <label className="block text-sm font-medium">From Date:</label>
+                                    <input
+                                    type="date"
+                                    value={fromDate}
+                                    onChange={(e) => setFromDate(e.target.value)}
+                                    className="border rounded p-2"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium">To Date:</label>
+                                    <input
+                                    type="date"
+                                    value={toDate}
+                                    onChange={(e) => setToDate(e.target.value)}
+                                    className="border rounded p-2"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleFilter}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                >
+                                    Filter
+                                </button>
+                                </div>
+                                <input
+                                type="text"
+                                placeholder="Search for Order Number, Customer Name, Tracking #"
+                                className="w-full rounded-md border p-2 mb-2"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                />
                                 <table className="w-full table-auto border-collapse border border-gray-300">
                                     <thead>
                                         <tr className="bg-gray-100">
@@ -76,7 +112,7 @@ const SalesPaymentsList = ({ sales_payments }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {sales_payments?.map(
+                                        {sales_payments.data?.map(
                                             (sales_payment, index) => (
                                                 <tr key={sales_payment.id}>
                                                     <td className="border border-gray-300 px-4 py-2">
@@ -134,6 +170,27 @@ const SalesPaymentsList = ({ sales_payments }) => {
                                         )}
                                     </tbody>
                                 </table>
+                                {sales_payments.links && (
+                                                                                  <div className="mt-4 flex justify-center">
+                                                                                    {sales_payments.links.map((link, index) => (
+                                                                                      <button
+                                                                                        key={index}
+                                                                                        onClick={() => {
+                                                                                          if (link.url) {
+                                                                                            router.visit(link.url, {
+                                                                                              preserveState: true,
+                                                                                              preserveScroll: true,
+                                                                                            });
+                                                                                          }
+                                                                                        }}
+                                                                                        className={`mx-1 px-3 py-1 border rounded ${
+                                                                                          link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+                                                                                        }`}
+                                                                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                                                                      ></button>
+                                                                                    ))}
+                                                                                  </div>
+                                                                                )}
                             </div>
                         </div>
                     </div>
