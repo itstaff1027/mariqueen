@@ -16,4 +16,8 @@ class SizeValues extends Model
         'size_values',
         'size_id'
     ];
+
+    public function size(){
+        return $this->belongsTo(Size::class, 'size_id');
+    }
 }

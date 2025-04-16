@@ -13,36 +13,35 @@ export default function SalesLayout({ header, children }) {
     const allowedRoutes = user.allowed_routes || [];
     const paths = [
         {
-            'id': '0',
-            'name': 'Sales',
-            'route': 'sales'
+            id: '0',
+            name: 'Sales',
+            route: 'sales',
         },
         {
-            'id': '1',
-            'name': 'Point of Sales',
-            'route': 'point_of_sales.index'
+            id: '1',
+            name: 'Point of Sales',
+            route: 'point_of_sales.index',
         },
         {
-            'id': '2',
-            'name': 'Customers',
-            'route': 'customers.index'
+            id: '2',
+            name: 'Customers',
+            route: 'customers.index',
         },
         {
-            'id': '3',
-            'name': 'Sales Payments',
-            'route': 'sales_payments.index'
+            id: '3',
+            name: 'Sales Payments',
+            route: 'sales_payments.index',
         },
-        // {
-        //     'id': '5',
-        //     'name': 'Order Types',
-        //     'route': 'create-order-types'
-        // },
-        // {
-        //     'id': '6',
-        //     'name': 'Page Sections',
-        //     'route': 'page_sections'
-        // }
-        
+        {
+            id: '4',
+            name: 'Sales Order Returns',
+            route: 'sales_order_returns.index',
+        },
+        {
+            id: '5',
+            name: 'Made To Order',
+            route: 'made_to_orders.index',
+        },
     ];
 
     const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);

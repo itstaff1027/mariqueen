@@ -141,7 +141,7 @@ class PointOfSalesController extends Controller
                         DB::raw("SUM(quantity) as stock_change")
                     )
                     ->from('stock_movements')
-                    ->whereIn('movement_type', ['purchase', 'transfer_in'])
+                    ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
                     ->whereIn('to_warehouse_id', $warehouseIds)
                     ->groupBy('product_variant_id', 'to_warehouse_id')
                     ->unionAll(
@@ -187,7 +187,7 @@ class PointOfSalesController extends Controller
             'cart' => 'required|array',
             'courier_id' => 'required|exists:couriers,id',
             'payment_method_id' => 'required|exists:payment_methods,id',
-            'shipping_cost' => 'required|numeric|min:1',
+            'shipping_cost' => 'required|numeric|min:0',
             'rush_order_fee' => 'nullable|string',
             'total_amount' => 'required|numeric|min:1',
             'payment_amount' => 'required|string',

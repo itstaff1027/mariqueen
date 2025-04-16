@@ -499,12 +499,12 @@ const POS = ({
                             Total: ₱{totalAmount.toFixed(2)}
                         </p>
 
-                        <h1>KULANG NG FETCHING FOR PROMO, BUNDLES</h1>
+                        {/* <h1>KULANG NG FETCHING FOR PROMO, BUNDLES</h1> */}
                         <Link
                             href="/customers/create"
                             className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
                         >
-                            Create Order
+                            New Customer
                         </Link>
                         <InputLabel for="customer" value="Customer" />
                         <div className="relative">

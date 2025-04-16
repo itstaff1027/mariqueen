@@ -148,7 +148,7 @@ const SalesOrderView = ({ sales_order, user}) => {
 
                                     <div className="grid grid-cols-2 w-full">
                                         <h1 className="text-2xl font-bold w-full text-left">Courier: <u>{sales_order.courier.name.toUpperCase()}</u></h1>
-                                        <h1 className="text-2xl font-bold w-full text-right">Packaging Type: <u>{sales_order.packaging_type.packaging_name.toUpperCase()}</u></h1>
+                                        <h1 className="text-2xl font-bold w-full text-right">Packaging Type: <u>{sales_order.packaging_type?.packaging_name.toUpperCase()}</u></h1>
                                     </div>
                                     <div className="grid grid-cols-2 w-full">
                                         <h1 className="text-2xl font-bold w-full text-left">Shoulder By: <u>{sales_order.shoulder_by.toUpperCase()}</u></h1>
@@ -231,7 +231,7 @@ const SalesOrderView = ({ sales_order, user}) => {
                                     </div>
 
                                     <div className="w-full mb-4">
-                                        <p className="text-l font-bold w-full">Packaging Type Description: <u>{sales_order.packaging_type.description}</u></p>
+                                        <p className="text-l font-bold w-full">Packaging Type Description: <u>{sales_order.packaging_type?.description}</u></p>
                                     </div>
 
                                     <div className="mb-4 w-full">

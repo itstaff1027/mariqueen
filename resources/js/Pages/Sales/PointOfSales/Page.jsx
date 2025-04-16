@@ -26,8 +26,132 @@ const SalesOrderList = ({ sales_orders }) => {
     };
 
     useEffect(() => {
-        // console.log(sales_orders);
+        console.log(sales_orders);
     }, [])
+
+    const exportExcel = () => {
+        // Define a header row with order fields + payment fields + item fields
+        const headerRow = [
+          "Order Number", "Client Name", "Agent Name", "Sold From", "Tracking Number", "Courier",
+          "Shoulder By", "Packaging Type", "Shipping Cost", "Rush Cost", "Total Cost", "Client Payment",
+          "Status", "Created At", "Updated At",
+          "Payment ID", "Payment Amount", "Excess Amount", "Remaining Balance", "Payment Status", "Payment Method", "Payment Created At",
+          "Item ID", "Quantity", "Unit Price", "Total Price", "Discount Amount", "Product SKU", "Product Name", "Color", "Size", "Heel Height"
+        ];
+      
+        // This array will hold all rows.
+        let worksheetData = [headerRow];
+        const orderLevelColumns = 15; 
+        let mergeRanges = [];
+        let currentRow = 1;
+      
+        // Loop through each sales order
+        sales_orders.data.forEach(order => {
+          // Build your order row (order-level data)
+          const orderRow = [
+            order.order_number,
+            order.customers.first_name + ' ' + order.customers.last_name,
+            order.user.name,
+            order.warehouse.name,
+            order.tracking_number,
+            order.courier?.name || "",
+            order.shoulder_by,
+            order.packaging_type?.packaging_name || "",
+            order.shipping_cost,
+            order.rush_order_fee,
+            order.total_amount,
+            order.grand_amount, // or client payment if different
+            order.status,
+            order.created_at,
+            order.updated_at
+          ];
+      
+          // Determine number of rows needed for this order
+          // At least 1 row even if both arrays are empty
+          const numPayments = order.payments ? order.payments.length : 0;
+          const numItems = order.items ? order.items.length : 0;
+          const maxRows = Math.max(1, numPayments, numItems);
+      
+          // For each row required, add payment and item info if available.
+          for (let i = 0; i < maxRows; i++) {
+            const row = [...orderRow]; // copy order-level details
+      
+            // Payment data
+            if (order.payments && order.payments[i]) {
+              let payment = order.payments[i];
+              row.push(
+                payment.id,
+                payment.amount_paid,
+                payment.excess_amount,
+                payment.remaining_balance,
+                payment.status,
+                payment.payment_method?.name || "",
+                payment.created_at
+              );
+            } else {
+              // push empty values if no payment at this index
+              row.push("", "", "", "", "", "", "");
+            }
+      
+            // Item data
+            if (order.items && order.items[i]) {
+              let item = order.items[i];
+              row.push(
+                item.id,
+                item.quantity,
+                item.unit_price,
+                item.total_price,
+                item.discount_amount,
+                item.product_variant?.sku || "",
+                item.product_variant?.product?.product_name || "",
+                item.product_variant?.colors?.color_name || "",
+                item.product_variant?.size_values?.size_values || "",
+                item.product_variant?.heel_heights?.value || "",
+              );
+            } else {
+              // push empty values if no item at this index
+              row.push("", "", "", "", "", "", "", "", "", "");
+            }
+
+            if (maxRows > 1) {
+                for (let col = 0; col < orderLevelColumns; col++) {
+                  mergeRanges.push({
+                    s: { r: currentRow, c: col },
+                    e: { r: currentRow + maxRows - 1, c: col }
+                  });
+                }
+              }
+              currentRow += maxRows;
+      
+            worksheetData.push(row);
+          }
+            // If order spans more than one row, generate merge ranges for order-level columns.
+
+        });
+        
+        // Create worksheet and auto-fit columns as in your original code
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      
+        // Auto-fit columns
+        const colWidths = headerRow.map((header, colIndex) => {
+          let maxLength = header ? header.toString().length : 10;
+          worksheetData.forEach((row) => {
+            const cell = row[colIndex];
+            if (cell) {
+              maxLength = Math.max(maxLength, cell.toString().length);
+            }
+          });
+          return { wch: maxLength + 2 };
+        });
+        worksheet["!cols"] = colWidths;
+        worksheet["!merges"] = mergeRanges;
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Transactions");
+      
+        // Generate filename based on the current date.
+        XLSX.writeFile(workbook, `Sales_Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
+      };
+      
     
     return(
         <AuthenticatedLayout
@@ -50,6 +174,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                     >
                                         Create Order
                                     </Link>
+                                    <button onClick={exportExcel}>Export</button>
                                 </div>
                                 <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                                 <div>
@@ -135,27 +260,27 @@ const SalesOrderList = ({ sales_orders }) => {
                                         ))}
                                     </tbody>
                                 </table>
-                                                {sales_orders.links && (
-                                                  <div className="mt-4 flex justify-center">
-                                                    {sales_orders.links.map((link, index) => (
-                                                      <button
-                                                        key={index}
-                                                        onClick={() => {
-                                                          if (link.url) {
+                                {sales_orders.links && (
+                                    <div className="mt-4 flex justify-center">
+                                        {sales_orders.links.map((link, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => {
+                                                    if (link.url) {
                                                             router.visit(link.url, {
-                                                              preserveState: true,
-                                                              preserveScroll: true,
-                                                            });
-                                                          }
-                                                        }}
-                                                        className={`mx-1 px-3 py-1 border rounded ${
-                                                          link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
-                                                        }`}
-                                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                                      ></button>
-                                                    ))}
-                                                  </div>
-                                                )}
+                                                            preserveState: true,
+                                                            preserveScroll: true,
+                                                        });
+                                                    }
+                                                }}
+                                                className={`mx-1 px-3 py-1 border rounded ${
+                                                link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+                                                }`}
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            ></button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

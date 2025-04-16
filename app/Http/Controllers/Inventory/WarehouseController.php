@@ -76,7 +76,7 @@ class WarehouseController extends Controller
                         DB::raw("SUM(quantity) as total_stock")
                     )
                     ->from('stock_movements')
-                    ->whereIn('movement_type', ['purchase', 'transfer_in'])
+                    ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
                     ->where('to_warehouse_id', $id)
                     ->groupBy('product_variant_id', 'to_warehouse_id')
                     ->unionAll(
@@ -192,7 +192,7 @@ class WarehouseController extends Controller
             'product_variant_id',
             DB::raw("SUM(
                 CASE 
-                    WHEN movement_type IN ('purchase', 'transfer_in') AND to_warehouse_id = {$warehouseId} THEN quantity
+                    WHEN movement_type IN ('purchase', 'transfer_in', 'return') AND to_warehouse_id = {$warehouseId} THEN quantity
                     WHEN movement_type IN ('transfer_out', 'sale') AND from_warehouse_id = {$warehouseId} THEN quantity
                     ELSE 0
                 END
@@ -212,7 +212,7 @@ class WarehouseController extends Controller
             'movement_type',
             DB::raw("SUM(
                 CASE 
-                    WHEN movement_type IN ('purchase', 'transfer_in') AND to_warehouse_id = {$warehouseId} THEN quantity
+                    WHEN movement_type IN ('purchase', 'transfer_in', 'return') AND to_warehouse_id = {$warehouseId} THEN quantity
                     WHEN movement_type IN ('transfer_out', 'sale') AND from_warehouse_id = {$warehouseId} THEN quantity
                     ELSE 0
                 END

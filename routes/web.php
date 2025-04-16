@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\Finance\FinanceMTOOrdersController;
 use App\Http\Controllers\Inventory\InventoryOrderController;
+use App\Http\Controllers\Inventory\MadeToOrderProductsController;
 use App\Http\Controllers\Inventory\PackagingTypeController;
+use App\Http\Controllers\Logistics\LogisticsMTOOrdersController;
 use App\Http\Controllers\Logistics\LogisticsOrderController;
+use App\Http\Controllers\Sales\MadeToOrderController;
 use App\Http\Controllers\Sales\SalesPaymentController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +33,8 @@ use App\Http\Controllers\GlobalSettings\SizeValueController;
 use App\Http\Controllers\GlobalSettings\HeelHeightController;
 use App\Http\Controllers\Inventory\StockTransactionController;
 use App\Http\Controllers\Inventory\AssignUserToWarehouseController;
+use App\Http\Controllers\Inventory\InventoryMTOOrdersController;
+use App\Http\Controllers\Sales\SalesOrderReturnsController;
 
 Route::get('/', function () {
     return Redirect()->route('login');
@@ -59,6 +65,8 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::post('/inventory/products/variants', [ProductsController::class, 'store_variants']);
     Route::get('/inventory/product/variant/{id}', [ProductsController::class, 'show_product_variant']);
     
+    Route::resource('/inventory_mto_products', MadeToOrderProductsController::class);
+
     // Route::post('/inventory/product/front_image/upload', [ProductsController::class, 'update_front_image']);
     // Route::post('/inventory/product/gallery_images/upload', [ProductsController::class, 'update_gallery_images']);
     // Route::post('/inventory/product/gallery_images/update_colors', [ProductsController::class, 'assign_color_images']);
@@ -83,6 +91,9 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/inventory_orders', InventoryOrderController::class);
     Route::post('/inventory_orders/update/status/{id}', [InventoryOrderController::class, 'update_status'])->name('inventory_orders.update_status');
 
+    Route::resource('/inventory_mto_orders', InventoryMTOOrdersController::class);
+    Route::post('/inventory_mto_orders/update/status/{id}', [InventoryMTOOrdersController::class, 'update_status'])->name('inventory_orders.update_status');
+
     Route::resource('/inventory_packaging_types', PackagingTypeController::class);
 });
 
@@ -90,6 +101,8 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/customers', CustomersController::class);
 
     Route::resource('/point_of_sales', PointOfSalesController::class);
+    Route::resource('/made_to_orders', MadeToOrderController::class);
+    Route::post('/made_to_orders/update/status/{id}', [MadeToOrderController::class, 'update_status']);
 
     Route::resource('/sales_orders', SalesOrderController::class);
     Route::post('/sales_orders/update/status/{id}', [SalesOrderController::class, 'update_status'])->name('sales_orders.update_status');
@@ -100,6 +113,9 @@ Route::middleware(['auth','route.authorization'])->group(function () {
 
     Route::get('/sales_order/{id}', [SalesPaymentController::class, 'get_sales_order']);
     // Route::resource('/sales_payments', SalesPaymentController::class);
+
+    Route::resource('/sales_order_returns', SalesOrderReturnsController::class);
+    Route::post('/sales_order_returns/update/status/{id}', [SalesOrderReturnsController::class, 'update_status'])->name('sales_order_return.update-status');
 });
 
 Route::middleware(['auth','route.authorization'])->group(function () {
@@ -107,6 +123,9 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/discounts', DiscountsController::class);
     Route::resource('/finance_orders', FinanceOrdersController::class);
     Route::post('/finance_orders/update/status/{id}', [FinanceOrdersController::class, 'update_status'])->name('finance_orders.update_status');
+
+    Route::resource('/finance_mto_orders', FinanceMTOOrdersController::class);
+    Route::post('/finance_mto_orders/update/status/{id}', [FinanceMTOOrdersController::class, 'update_status'])->name('finance_orders.update_status');
 });
 
 Route::middleware(['auth','route.authorization'])->group(function () {
@@ -114,6 +133,9 @@ Route::middleware(['auth','route.authorization'])->group(function () {
 
     Route::resource('/logistics_orders', LogisticsOrderController::class);
     Route::post('/logistics_orders/update/status/{id}', [LogisticsOrderController::class, 'update_status'])->name('logistics_orders.update_status');
+
+    Route::resource('/logistics_mto_orders', LogisticsMTOOrdersController::class);
+    Route::post('/logistics_mto_orders/update/status/{id}', [LogisticsMTOOrdersController::class, 'update_status'])->name('logistics_orders.update_status');
 });
 
 Route::middleware(['route.authorization'])->group(function (){

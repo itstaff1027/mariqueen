@@ -27,11 +27,11 @@ export default function LogisticsLayout({ header, children }) {
             'name': 'Sales Orders',
             'route': 'logistics_orders.index'
         },
-        // {
-        //     'id': '3',
-        //     'name': 'Warehouse',
-        //     'route': 'warehouses.index'
-        // },
+        {
+            'id': '3',
+            'name': 'Made To Orders',
+            'route': 'logistics_mto_orders.index'
+        },
         // {
         //     'id': '4',
         //     'name': 'Categories',

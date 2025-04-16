@@ -30,11 +30,11 @@ export default function FinanceLayout({ header, children }) {
             'name': 'Discounts',
             'route': 'discounts.index'
         },
-        // {
-        //     'id': '3',
-        //     'name': 'Warehouse',
-        //     'route': 'warehouses.index'
-        // },
+        {
+            'id': '4',
+            'name': 'Made To Orders',
+            'route': 'finance_mto_orders.index'
+        },
         // {
         //     'id': '4',
         //     'name': 'Categories',

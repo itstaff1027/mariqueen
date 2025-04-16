@@ -96,7 +96,7 @@ class StockTransactionController extends Controller
                 DB::raw("SUM(quantity) as stock_change")
             )
             ->from('stock_movements')
-            ->whereIn('movement_type', ['purchase', 'transfer_in'])
+            ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
             ->groupBy('product_variant_id', 'to_warehouse_id')
 
             ->unionAll(
@@ -313,7 +313,7 @@ class StockTransactionController extends Controller
                 DB::raw("SUM(quantity) as stock_change")
             )
             ->from('stock_movements')
-            ->whereIn('movement_type', ['purchase', 'transfer_in'])
+            ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
             ->groupBy('product_variant_id', 'to_warehouse_id')
 
             ->unionAll(
@@ -422,7 +422,7 @@ class StockTransactionController extends Controller
                             DB::raw("SUM(quantity) as stock_change")
                         )
                         ->from('stock_movements')
-                        ->whereIn('movement_type', ['purchase', 'transfer_in'])
+                        ->whereIn('movement_type', ['purchase', 'transfer_in', 'return'])
                         ->groupBy('product_variant_id', 'to_warehouse_id')
             
                         ->unionAll(

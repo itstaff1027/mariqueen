@@ -13,46 +13,51 @@ export default function InventoryLayout({ header, children }) {
     const allowedRoutes = user.allowed_routes || [];
     const paths = [
         {
-            'id': '0',
-            'name': 'Inventory',
-            'route': 'inventory'
+            id: '0',
+            name: 'Inventory',
+            route: 'inventory',
         },
         {
-            'id': '1',
-            'name': 'Products',
-            'route': 'products.index'
+            id: '1',
+            name: 'Products',
+            route: 'products.index',
         },
         {
-            'id': '2',
-            'name': 'Stocks',
-            'route': 'stocks.index'
+            id: '2',
+            name: 'Stocks',
+            route: 'stocks.index',
         },
         {
-            'id': '2',
-            'name': 'Stock Transactions',
-            'route': 'transactions.index'
+            id: '2',
+            name: 'Stock Transactions',
+            route: 'transactions.index',
         },
         {
-            'id': '3',
-            'name': 'Warehouse',
-            'route': 'warehouses.index'
+            id: '3',
+            name: 'Warehouse',
+            route: 'warehouses.index',
         },
         {
-            'id': '4',
-            'name': 'Sales Orders',
-            'route': 'inventory_orders.index'
+            id: '4',
+            name: 'Sales Orders',
+            route: 'inventory_orders.index',
         },
         {
-            'id': '5',
-            'name': 'Packaging Types',
-            'route': 'inventory_packaging_types.index'
+            id: '5',
+            name: 'Packaging Types',
+            route: 'inventory_packaging_types.index',
         },
-        // {
-        //     'id': '6',
-        //     'name': 'Page Sections',
-        //     'route': 'page_sections'
-        // }
-        
+        {
+            id: '6',
+            name: 'Made To Order Products',
+            route: 'inventory_mto_products.index',
+        },
+        ,
+        {
+            id: '7',
+            name: 'Made To Orders',
+            route: 'inventory_mto_orders.index',
+        },
     ];
 
     const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);
