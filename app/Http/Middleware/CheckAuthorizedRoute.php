@@ -3,10 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Carbon\Carbon;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 
 class CheckAuthorizedRoute
 {
@@ -44,7 +45,12 @@ class CheckAuthorizedRoute
 
         // Check if the authenticated user has any of the allowed roles.
         if (!$request->user() || !$request->user()->hasAnyRole($allowedRoleIds)) {
-            abort(403, 'Unauthorized.');
+            // abort(403, 'Unauthorized.');
+            return Inertia::render('Errors/ErrorPage', [
+                'status' => 403,
+            ])
+            ->toResponse($request)
+            ->setStatusCode(403);
         }
 
         return $next($request);
