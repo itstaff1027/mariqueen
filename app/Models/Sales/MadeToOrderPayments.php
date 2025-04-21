@@ -25,4 +25,12 @@ class MadeToOrderPayments extends Model
     public function paymentMethod(){
         return $this->belongsTo(PaymentMethods::class, 'payment_method_id');
     }
+
+    public function salesOrder(){
+        return $this->belongsTo(MadeToOrders::class, 'made_to_order_id');
+    }
+
+    public function paymentImages(){
+        return $this->hasMany(MadeToOrderPaymentImages::class, 'mto_payment_id');
+    }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Inventory\PackagingTypeController;
 use App\Http\Controllers\Logistics\LogisticsMTOOrdersController;
 use App\Http\Controllers\Logistics\LogisticsOrderController;
 use App\Http\Controllers\Sales\MadeToOrderController;
+use App\Http\Controllers\Sales\MTOSalesPaymentController;
 use App\Http\Controllers\Sales\SalesPaymentController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
@@ -110,8 +111,12 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/sales_payments', SalesPaymentController::class);
     Route::post('/sales_payment/upload/images', [SalesPaymentController::class, 'upload_new_images']);
     Route::post('/sales_payment/destroy/image', [SalesPaymentController::class, 'destroy_image']);
-
     Route::get('/sales_order/{id}', [SalesPaymentController::class, 'get_sales_order']);
+   
+    Route::resource('/mto_sales_payments', MTOSalesPaymentController::class);
+    Route::post('/mto_sales_payment/upload/images', [MTOSalesPaymentController::class, 'upload_new_images']);
+    Route::post('/mto_sales_payment/destroy/image', [MTOSalesPaymentController::class, 'destroy_image']);
+    Route::get('/mto_sales_order/{id}', [MTOSalesPaymentController::class, 'get_sales_order']);
     // Route::resource('/sales_payments', SalesPaymentController::class);
 
     Route::resource('/sales_order_returns', SalesOrderReturnsController::class);

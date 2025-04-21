@@ -16,41 +16,66 @@ class CheckAuthorizedRoute
      */
     public function handle(Request $request, Closure $next)
     {
-        // Get the current route's name
-        $routeName = $request->route()->getName();
+        $user = $request->user();
 
-        // If there's no route name, skip further checks
-        if (!$routeName) {
+        // If there’s no named route, skip permission checks entirely.
+        $routeName = optional($request->route())->getName();
+        if (! $routeName) {
             return $next($request);
         }
 
-        // Get the latest update timestamp for authorized routes for this route.
+        // Map HTTP verbs to permission names:
+        $verbMap = [
+            'GET'    => 'view',
+            'POST'   => 'create',
+            'PUT'    => 'update',
+            'PATCH'  => 'update',
+            'DELETE' => 'delete',
+        ];
+
+        $method = $request->method();
+
+        // If it's a write (POST/PUT/PATCH/DELETE)…
+        if (isset($verbMap[$method]) && $method !== 'GET') {
+            $ability = $verbMap[$method];
+
+            // Grab only the permissions your roles grant
+            $rolePermNames = $user
+                ->getPermissionsViaRoles()
+                ->pluck('name')
+                ->toArray();
+
+            if (! $user || ! in_array($ability, $rolePermNames, true)) {
+                return Inertia::render('Errors/ErrorPage', ['status' => 403])
+                              ->toResponse($request)
+                              ->setStatusCode(403);
+            }
+
+            return $next($request);
+        }
+
+        //
+        // Otherwise it’s a GET, so fall back to your route‑cache logic:
+        //
         $maxUpdatedAt = DB::table('authorized_roles')
             ->where('route_name', $routeName)
             ->max('updated_at');
-
-        // Create a version based on updated_at (if none, use 'none')
-        $version = $maxUpdatedAt ? Carbon::parse($maxUpdatedAt)->format('YmdHis') : 'none';
-
-        // Build a cache key that includes the version.
+        $version  = $maxUpdatedAt
+                    ? Carbon::parse($maxUpdatedAt)->format('YmdHis')
+                    : 'none';
         $cacheKey = "authorized_routes:{$routeName}:{$version}";
 
-        // Retrieve allowed role IDs from the cache, or if not present, fetch from DB and cache them.
         $allowedRoleIds = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($routeName) {
             return DB::table('authorized_roles')
-                ->where('route_name', $routeName)
-                ->pluck('role_id')
-                ->toArray();
+                     ->where('route_name', $routeName)
+                     ->pluck('role_id')
+                     ->toArray();
         });
 
-        // Check if the authenticated user has any of the allowed roles.
-        if (!$request->user() || !$request->user()->hasAnyRole($allowedRoleIds)) {
-            // abort(403, 'Unauthorized.');
-            return Inertia::render('Errors/ErrorPage', [
-                'status' => 403,
-            ])
-            ->toResponse($request)
-            ->setStatusCode(403);
+        if (! $user || ! $user->hasAnyRole($allowedRoleIds)) {
+            return Inertia::render('Errors/ErrorPage', ['status' => 403])
+                          ->toResponse($request)
+                          ->setStatusCode(403);
         }
 
         return $next($request);

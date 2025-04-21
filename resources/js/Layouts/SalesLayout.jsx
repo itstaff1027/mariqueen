@@ -42,6 +42,11 @@ export default function SalesLayout({ header, children }) {
             name: 'Made To Order',
             route: 'made_to_orders.index',
         },
+        {
+            id: '6',
+            name: 'Made To Order Payments',
+            route: 'mto_sales_payments.index',
+        },
     ];
 
     const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);
