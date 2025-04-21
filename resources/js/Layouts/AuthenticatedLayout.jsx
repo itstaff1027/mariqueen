@@ -30,7 +30,7 @@ export default function AuthenticatedLayout({ header, children }) {
     ];
     useEffect(() => {
         // console.log(user.allowed_routes);
-        console.log('allowedRoutes:', user);
+        // console.log('allowedRoutes:', user);
     }, [])
 
 
@@ -41,7 +41,7 @@ export default function AuthenticatedLayout({ header, children }) {
     // Then filter your paths:
     const filteredPaths = allowedRouteNames.length > 0 
         ? paths.filter((path) => allowedRouteNames.includes(path.route))
-        : paths;
+        : [];
 
 
     return (
@@ -53,7 +53,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     </Link>
                 </div>
                 <div className="flex flex-col space-y-1 p-2">
-                    {filteredPaths.map((path, i) => (
+                    {filteredPaths.length > 0 && filteredPaths?.map((path, i) => (
                         <Link
                             key={i}
                             href={route(path.route)}
@@ -64,7 +64,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 : path.name
                             }
                         </Link>
-                    ))}
+                    )) || <div className="text-black">No Available Routes</div>}
                 </div>
                 <div className="mt-auto p-2">
                     {!collapsed && (
