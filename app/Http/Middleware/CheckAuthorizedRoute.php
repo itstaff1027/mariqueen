@@ -42,11 +42,6 @@ class CheckAuthorizedRoute
                 ->toArray();
         });
 
-        // If no restrictions are set for this route, allow the request.
-        if (empty($allowedRoleIds)) {
-            return $next($request);
-        }
-
         // Check if the authenticated user has any of the allowed roles.
         if (!$request->user() || !$request->user()->hasAnyRole($allowedRoleIds)) {
             abort(403, 'Unauthorized.');

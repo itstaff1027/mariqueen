@@ -2,9 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -33,7 +34,19 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => function () {
+                    $user = Auth::user();
+                
+                    if ($user) {
+                        // Eager load the relationships you need, e.g., user_roles or allowedRoutes
+                        $user->load(relations: ['allowedRoutes', 'roles', 'roles.permissions']);
+                        // $allowedRoutes = $user->allowedRoutes->pluck('route_name')->toArray();
+                    } else {
+                        return [];
+                    }
+                
+                    return $user;
+                },
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
