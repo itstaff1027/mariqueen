@@ -7,7 +7,7 @@ const SalesPaymentsList = ({ sales_payments }) => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const handleFilter = () => {
-        router.visit('/point_of_sales', {
+        router.visit('/sales_payments', {
         method: 'get',
         data: { search, fromDate, toDate },
         preserveState: true,
@@ -18,6 +18,63 @@ const SalesPaymentsList = ({ sales_payments }) => {
     useEffect(() => {
         console.log(sales_payments);
     }, [])
+
+    const exportExcel = () => {
+        // Build header row for the simple report.
+        const headerRow = [
+            "Order #",
+            "Client Name",
+            "Status",
+            "Payment Method",
+            "Total Cost",
+            "Balance",
+            "Payment",
+            "Excess",
+            "Created At"
+        ];
+    
+        // Export only the currently loaded (filtered & paginated) data
+        // Now mapping each transaction into an array instead of an object.
+        const dataRows = sales_payments.data.map((transaction) => [
+            transaction.sales_order.order_number,
+            transaction.sales_order.customers.first_name +
+                ' ' +
+                transaction.sales_order.customers.last_name,
+            transaction.status,
+            transaction.payment_method.name,
+            transaction.sales_order.grand_amount,
+            transaction.remaining_balance,
+            transaction.amount_paid,
+            transaction.excess,
+            transaction.created_at
+        ]);
+    
+        // Combine header row and data rows.
+        const worksheetData = [headerRow, ...dataRows];
+    
+        // Create worksheet and workbook.
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+        // Auto-fit columns.
+        const colWidths = headerRow.map((header, colIndex) => {
+            let maxLength = header ? header.toString().length : 10;
+            worksheetData.forEach((row) => {
+                const cell = row[colIndex];
+                if (cell) {
+                    maxLength = Math.max(maxLength, cell.toString().length);
+                }
+            });
+            return { wch: maxLength + 2 };
+        });
+        worksheet["!cols"] = colWidths;
+    
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Payment Transactions");
+        XLSX.writeFile(
+            workbook,
+            `Sales_Payment_Transactions_${new Date().toISOString().split("T")[0]}.xlsx`
+        );
+    };
     
     return (
         <AuthenticatedLayout
@@ -32,56 +89,61 @@ const SalesPaymentsList = ({ sales_payments }) => {
                     <div className="overflow-hidden rounded-lg bg-white shadow-md">
                         <div className="p-6">
                             <div className="container mx-auto p-6">
-                                <div className="mb-6 flex items-center justify-between">
-                                    <h1 className="text-2xl font-bold">
-                                        Sales Payment
-                                    </h1>
-                                    <Link
-                                        href="/sales_payments/create"
-                                        className="rounded bg-blue-500 px-4 py-2 text-white shadow hover:bg-blue-600"
-                                    >
-                                        Create Payment
-                                    </Link>
-                                    {/* <Link
-                                        href="/sales_payment/assign_sales_payment"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Assign User to sales_payment
-                                    </Link> */}
+                                <div className="bg-white p-6 rounded-2xl shadow-md space-y-6 w-full mb-2">
+                                    <div className="flex flex-col w-full justify-between md:flex-row md:justify-betweem md:items-center gap-4">
+                                        <h1 className="text-3xl w-full font-semibold">Sales Payments</h1>
+                                        <div className="flex flex-wrap gap-3 justify-end w-full">
+                                            <Link
+                                                href="/sales_payments/create"
+                                                className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                            >
+                                                Create Payments
+                                            </Link>
+                                            <button 
+                                                onClick={exportExcel}
+                                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+                                            >
+                                                Export
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">From Date:</label>
+                                            <input
+                                                type="date"
+                                                value={fromDate}
+                                                onChange={(e) => setFromDate(e.target.value)}
+                                                className="border w-full rounded p-2"
+                                            />
+                                        </div>
+                                        <div className="w-full">
+                                            <label className="block text-sm font-medium text-gray-700">To Date:</label>
+                                            <input
+                                                type="date"
+                                                value={toDate}
+                                                onChange={(e) => setToDate(e.target.value)}
+                                                className="border w-full rounded p-2"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleFilter}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                        >
+                                            Filter
+                                        </button>
+                                        
+                                    </div>
+                                    <div className="w-full relative m-0">
+                                        <input
+                                            type="text"
+                                            placeholder="Search for Order Number, Customer Name, or Status"
+                                            className="w-full absolute -translate-y-1/2 text-gray-400"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-                                <div>
-                                    <label className="block text-sm font-medium">From Date:</label>
-                                    <input
-                                    type="date"
-                                    value={fromDate}
-                                    onChange={(e) => setFromDate(e.target.value)}
-                                    className="border rounded p-2"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">To Date:</label>
-                                    <input
-                                    type="date"
-                                    value={toDate}
-                                    onChange={(e) => setToDate(e.target.value)}
-                                    className="border rounded p-2"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleFilter}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                >
-                                    Filter
-                                </button>
-                                </div>
-                                <input
-                                type="text"
-                                placeholder="Search for Order Number, Customer Name, Tracking #"
-                                className="w-full rounded-md border p-2 mb-2"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                />
                                 <table className="w-full table-auto border-collapse border border-gray-300">
                                     <thead>
                                         <tr className="bg-gray-100">

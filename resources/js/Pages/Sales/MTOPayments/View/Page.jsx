@@ -6,7 +6,7 @@ const ViewSalesPayments = ({ mto_sales_payment }) => {
     // Use the form hook to store data, even though we're displaying read-only values.
     const { data } = useForm({
         mto_sales_payment_id: mto_sales_payment.id || '',
-        order_number: mto_sales_payment.sales_order.order_number || '',
+        order_number: mto_sales_payment.sales_order.mto_order_number || '',
         payment_method: mto_sales_payment.payment_method.name || '',
         status: mto_sales_payment.status || '',
         client_payment_amount: mto_sales_payment.amount_paid || '',

@@ -17,7 +17,12 @@ class SalesPaymentController extends Controller
 {
     public function index(Request $request){
         $user = Auth::user();
-        $query = SalesPayments::with(['paymentMethod', 'salesOrder', 'salesOrder.customers', 'paymentImages'])->orderBy('created_at', 'desc');
+        $query = SalesPayments::with([
+            'paymentMethod', 
+            'salesOrder', 
+            'salesOrder.customers', 
+            'paymentImages'
+        ])->orderBy('created_at', 'desc');
         // Flatten all permissions from all roles into one collection
         $permissions = $user->roles->flatMap(function ($role) {
             return $role->permissions;
@@ -43,12 +48,14 @@ class SalesPaymentController extends Controller
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('order_number', 'LIKE', "%{$searchTerm}%")
-                ->orWhere('tracking_number', 'LIKE', "%{$searchTerm}%")
-                ->orWhereHas('customers', function ($q2) use ($searchTerm){
+                $q->where('status', 'LIKE', "%{$searchTerm}%")
+                ->orWhereHas('salesOrder', function ($q1) use ($searchTerm) {
+                    $q1->where('order_number', 'LIKE', "%{$searchTerm}%");
+                })
+                ->orWhereHas('salesOrder.customers', function ($q2) use ($searchTerm){
                     $q2->where('first_name', 'LIKE', $searchTerm);
                 })
-                ->orWhereHas('customers', function ($q3) use ($searchTerm){
+                ->orWhereHas('salesOrder.customers', function ($q3) use ($searchTerm){
                     $q3->where('last_name', 'LIKE', $searchTerm);
                 });
             });

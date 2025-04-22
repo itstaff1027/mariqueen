@@ -21,6 +21,7 @@ class SalesOrderReturnsController extends Controller
         $query = SalesOrderReturns::with([
             'referenceOrder',
             'referenceOrder.customers',
+            'warehouse'
         ])
         ->orderBy('created_at', 'desc');
 
