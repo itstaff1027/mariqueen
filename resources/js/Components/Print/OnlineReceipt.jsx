@@ -102,7 +102,7 @@ const OnlineReceipt = ({ onClose, order }) => {
         >
           <div className="container mx-auto p-6">
             {/* Logo (if loaded) */}
-            {logoBase64 && (
+            {/* {logoBase64 && (
               <div className="flex justify-center mb-4">
                 <img
                   src={logoBase64}
@@ -110,7 +110,7 @@ const OnlineReceipt = ({ onClose, order }) => {
                   style={{ maxWidth: "150px", marginBottom: "10px" }}
                 />
               </div>
-            )}
+            )} */}
 
             <div className="flex w-full flex-col items-center justify-center p-10">
               <div className="grid w-full grid-cols-2 border-b-2">

@@ -24,6 +24,7 @@ class InventoryMTOOrdersController extends Controller
             'packagingType',
             'items',
             'items.madeToOrderProduct',
+            'packagingType'
         ])
         ->orderBy('created_at', 'desc')->whereIn('status' , ['paid', 'preparing', 'shipped', 'delivered']);
 
@@ -39,6 +40,7 @@ class InventoryMTOOrdersController extends Controller
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('mto_order_number', 'LIKE', "%{$searchTerm}%")
                 ->orWhere('tracking_number', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('status', 'LIKE', "%{$searchTerm}%")
                 ->orWhereHas('customers', function ($q2) use ($searchTerm){
                     $q2->where('first_name', 'LIKE', $searchTerm);
                 })

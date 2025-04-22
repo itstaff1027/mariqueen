@@ -43,48 +43,61 @@ const InventorySalesMTOList = ({ made_to_orders }) => {
                     <div className="overflow-hidden bg-white shadow-md rounded-lg">
                         <div className="p-6">
                             <div className="container mx-auto p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h1 className="text-2xl font-bold">MTO</h1>
-                                    {/* <Link
-                                        href="/made_to_orders/create"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Create Order
-                                    </Link> */}
+                               <div className="bg-white p-6 rounded-2xl shadow-md space-y-6 w-full mb-2">
+                                    <div className="flex flex-col w-full justify-between md:flex-row md:justify-betweem md:items-center gap-4">
+                                        <h1 className="text-3xl w-full font-semibold">MTO Orders</h1>
+                                        <div className="flex flex-wrap gap-3 justify-end w-full">
+                                            {/* <Link
+                                                href="/sales_payments/create"
+                                                className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                            >
+                                                Create Payments
+                                            </Link> */}
+                                            {/* <button 
+                                                onClick={exportExcel}
+                                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+                                            >
+                                                Export
+                                            </button> */}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">From Date:</label>
+                                            <input
+                                                type="date"
+                                                value={fromDate}
+                                                onChange={(e) => setFromDate(e.target.value)}
+                                                className="border w-full rounded p-2"
+                                            />
+                                        </div>
+                                        <div className="w-full">
+                                            <label className="block text-sm font-medium text-gray-700">To Date:</label>
+                                            <input
+                                                type="date"
+                                                value={toDate}
+                                                onChange={(e) => setToDate(e.target.value)}
+                                                className="border w-full rounded p-2"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleFilter}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                        >
+                                            Filter
+                                        </button>
+                                        
+                                    </div>
+                                    <div className="w-full relative m-0">
+                                        <input
+                                            type="text"
+                                            placeholder="Search for Order Number, Customer Name, or Status"
+                                            className="w-full absolute -translate-y-1/2 text-gray-400"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-                                <div>
-                                    <label className="block text-sm font-medium">From Date:</label>
-                                    <input
-                                        type="date"
-                                        value={fromDate}
-                                        onChange={(e) => setFromDate(e.target.value)}
-                                        className="border rounded p-2"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">To Date:</label>
-                                    <input
-                                        type="date"
-                                        value={toDate}
-                                        onChange={(e) => setToDate(e.target.value)}
-                                        className="border rounded p-2"
-                                    />
-                                </div>
-                                    <button
-                                        onClick={handleFilter}
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Filter
-                                    </button>
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Search for Order Number, Customer Name, Tracking #"
-                                    className="w-full rounded-md border p-2 mb-2"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
                                 <table className="w-full table-auto border-collapse border border-gray-300">
                                     <thead>
                                         <tr className="bg-gray-100">

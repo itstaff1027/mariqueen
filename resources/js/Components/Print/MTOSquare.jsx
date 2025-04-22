@@ -36,15 +36,16 @@ const MTOSquare = ({ onClose, order }) => {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        zIndex: 50,
-      }}
+    style={{
+      position: 'fixed',
+      inset: 0,
+      // display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 50,
+  }}
+  className="overflow-auto"
     >
       <div
         style={{
@@ -76,7 +77,7 @@ const MTOSquare = ({ onClose, order }) => {
         >
           {/* Header with logo and sale date */}
           <div className="grid grid-cols-2">
-            {logoBase64 ? (
+            {/* {logoBase64 ? (
               <img
                 src={logoBase64}
                 alt="Logo"
@@ -84,7 +85,7 @@ const MTOSquare = ({ onClose, order }) => {
               />
             ) : (
               <h1 style={{ fontSize: "16pt", fontWeight: "bold" }}>Your Company Logo</h1>
-            )}
+            )} */}
             <div className="w-full text-right">
                 <h2 style={{ fontSize: "14pt", fontWeight: "bold" }}>
                     Closed Sale Date: <u>{new Date(order.created_at).toLocaleDateString()}</u>
@@ -204,6 +205,10 @@ const MTOSquare = ({ onClose, order }) => {
             </tbody>
           </table>
 
+          <div className="w-full border border-black p-2" style={{ fontWeight: 'bold' }}>Packaging Type: {order.packaging_type?.packaging_name}</div>
+                  <div className="w-full border border-black p-2" style={{ fontWeight: 'bold' }}>Shipping Cost: {order.shipping_cost} - Shoulder By: {order.shoulder_by}</div>
+                  <div className="w-full border border-black p-2" style={{ fontWeight: 'bold' }}>Remarks: {order.remarks}</div>
+
           {/* Customer Details Section */}
           <div style={{ marginBottom: "20px" }}>
             <div
@@ -217,14 +222,24 @@ const MTOSquare = ({ onClose, order }) => {
               <h1 style={{ fontSize: "20pt", margin: 0 }}>CUSTOMER DETAILS</h1>
             </div>
             <div style={{ marginTop: "10px" }}>
-              <h2 style={{ fontSize: "14pt", fontWeight: "bold" }}>
+              <h2 style={{ fontSize: "14pt", fontWeight: "bold", border: '1px solid #000', }}>
                 Receiver: {order.customers.phone}
               </h2>
-              <h2 style={{ fontSize: "14pt", fontWeight: "bold" }}>
-                Telephone/Mobile: {order.customers.phone}
+              <h2 style={{ fontSize: "14pt", fontWeight: "bold", border: '1px solid #000', }}>
+                Mobile #: {order.customers.phone}
               </h2>
-              <h2 style={{ fontSize: "14pt", fontWeight: "bold" }}>
+              <h2 style={{ fontSize: "14pt", fontWeight: "bold", border: '1px solid #000', }}>
                 Address: {order.customers.address}
+              </h2>
+              <h2
+                className="w-full border border-black p-2"
+                  style={{
+                      fontSize: '14pt',
+                      fontWeight: 'bold',
+                      border: '1px solid #000',
+                  }}
+              >
+                  SOCMED: {order.customers.social_media_account}
               </h2>
             </div>
           </div>

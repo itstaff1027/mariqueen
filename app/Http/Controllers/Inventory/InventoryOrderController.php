@@ -26,7 +26,8 @@ class InventoryOrderController extends Controller
             'items.productVariant.product',
             'items.productVariant.colors',
             'items.productVariant.size_values',
-            'items.productVariant.heelHeights'
+            'items.productVariant.heelHeights',
+            'packagingType'
         ])->orderBy('created_at', 'desc')->whereIn('status' , ['paid', 'preparing', 'shipped', 'delivered']);
 
         if($request->filled('customer_name')){
