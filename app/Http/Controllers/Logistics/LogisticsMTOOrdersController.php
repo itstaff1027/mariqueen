@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Logistics;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Sales\MadeToOrders;
 use Illuminate\Support\Facades\DB;
@@ -86,5 +87,38 @@ class LogisticsMTOOrdersController extends Controller
         });
 
         return redirect()->route('logistics_mto_orders.index')->with('success', 'Status updated successfully');
+    }
+
+    public function edit(string $id){
+        $made_to_order = MadeToOrders::with([
+            'user',
+            'customers',
+            'payments',
+            'payments.paymentMethod',
+            'stockMovements',
+            'discounts',
+            'courier',
+            'packagingType',
+            'items',
+            'items.madeToOrderProduct',
+        ])->findOrFail($id);
+
+        return inertia('Logistics/MTOOrders/Edit/Page', [
+            'made_to_order' => $made_to_order,
+        ]);
+    }
+
+
+    public function update(Request $request, string $id)
+    {
+        $order = MadeToOrders::findOrFail($id);
+        DB::transaction( function () use ($request, $order) {
+            $order->update([
+                'tracking_number' => $request->tracking_number,
+                'update_at' => Carbon::now()
+            ]);
+        });
+        
+        return redirect()->route('logistics_mto_orders.index')->with('success', 'Successfully added Tracking number: '. $request->tracking_number .' - at Order # : ' . $order->order_number);
     }
 }

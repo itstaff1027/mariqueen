@@ -18,6 +18,7 @@ const Inventory= ({ sizes }) => {
             {/* <h1>Fix Square layouts add necessary details to complete the data, sf fee, rush fee, shoulder by, packaging type</h1> */}
             {/* <h1>MTO/pre order square style layout</h1>
             <h1>MTO/pre-order pages for Sales Order</h1> */}
+            New Note: Add A way to print a custom Pinrtable data. It must be flexible -CRUD-.
         </InventoryLayout>
     );
 };

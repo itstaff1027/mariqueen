@@ -3,18 +3,78 @@ import { Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 const SalesOrderList = ({ sales_orders }) => {
+    const [search, setSearch] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [printModalData, setPrintModalData] = useState(null);
 
-    const destroy = (e, id) => {
-        e.preventDefault();
-
-        // if (confirm('Are you sure?')){
-        //     router.delete(`/sales_orders/${id}`);
-        // }
+    const handleFilter = () => {
+    router.visit('/logistics_orders', {
+        method: 'get',
+        data: { search, fromDate, toDate },
+        preserveState: true,
+        preserveScroll: true,
+    });
     };
 
     useEffect(() => {
         console.log(sales_orders);
     }, [])
+
+    const exportExcel = () => {
+        // Build header row for the simple report.
+        const headerRow = [
+            "NO. #",
+            "Sales Agent",
+            "Order #",
+            "Customer Soc_Med",
+            "Customer Full Name",
+            "Tracking #",
+            "No # of Box",
+            "Remarks"
+        ];
+    
+        // Export only the currently loaded (filtered & paginated) data
+        // Now mapping each transaction into an array instead of an object.
+        const dataRows = sales_orders.data.map((transaction, index) => [
+            index + 1,
+            transaction.user.name,
+            transaction.order_number,
+            transaction.customers.social_media_account,
+            transaction.customers.first_name +
+                ' ' +
+                transaction.customers.last_name,
+            transaction.tracking_number,
+            '',
+            ''
+        ]);
+    
+        // Combine header row and data rows.
+        const worksheetData = [headerRow, ...dataRows];
+    
+        // Create worksheet and workbook.
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+        // Auto-fit columns.
+        const colWidths = headerRow.map((header, colIndex) => {
+            let maxLength = header ? header.toString().length : 10;
+            worksheetData.forEach((row) => {
+                const cell = row[colIndex];
+                if (cell) {
+                    maxLength = Math.max(maxLength, cell.toString().length);
+                }
+            });
+            return { wch: maxLength + 2 };
+        });
+        worksheet["!cols"] = colWidths;
+    
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Shipment Transactions");
+        XLSX.writeFile(
+            workbook,
+            `Shipment_Transactions_${new Date().toISOString().split("T")[0]}.xlsx`
+        );
+    };
     
     return(
         <AuthenticatedLayout
@@ -29,20 +89,60 @@ const SalesOrderList = ({ sales_orders }) => {
                     <div className="overflow-hidden bg-white shadow-md rounded-lg">
                         <div className="p-6">
                             <div className="container mx-auto p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h1 className="text-2xl font-bold">Sales Order</h1>
-                                    {/* <Link
-                                        href="/point_of_sales/create"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Create Order
-                                    </Link> */}
-                                    {/* <Link
-                                        href="/sales_order/assign_sales_order"
-                                        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                                    >
-                                        Assign User to sales_order
-                                    </Link> */}
+                                <div className="bg-white p-6 rounded-2xl shadow-md space-y-6 w-full mb-2">
+                                    <div className="flex flex-col w-full justify-between md:flex-row md:justify-betweem md:items-center gap-4">
+                                        <h1 className="text-3xl w-full font-semibold">Sales Order</h1>
+                                        <div className="flex flex-wrap gap-3 justify-end w-full">
+                                            {/* <Link
+                                                href="/sales_payments/create"
+                                                className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                            >
+                                                Create Payments
+                                            </Link> */}
+                                            <button 
+                                                onClick={exportExcel}
+                                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+                                            >
+                                                Export
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">From Date:</label>
+                                            <input
+                                                type="date"
+                                                value={fromDate}
+                                                onChange={(e) => setFromDate(e.target.value)}
+                                                className="border w-full rounded p-2"
+                                            />
+                                        </div>
+                                        <div className="w-full">
+                                            <label className="block text-sm font-medium text-gray-700">To Date:</label>
+                                            <input
+                                                type="date"
+                                                value={toDate}
+                                                onChange={(e) => setToDate(e.target.value)}
+                                                className="border w-full rounded p-2"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleFilter}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                        >
+                                            Filter
+                                        </button>
+                                        
+                                    </div>
+                                    <div className="w-full relative m-0">
+                                        <input
+                                            type="text"
+                                            placeholder="Search for Order Number, Customer Name, or Status"
+                                            className="w-full absolute -translate-y-1/2 text-gray-400"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                                 <table className="w-full table-auto border-collapse border border-gray-300">
                                     <thead>
@@ -58,7 +158,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {sales_orders?.map((sales_order, index) => (
+                                        {sales_orders.data?.map((sales_order, index) => (
                                         <tr key={sales_order.id}>
                                             <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
                                             <td className="border border-gray-300 px-4 py-2">{sales_order.order_number}</td>
@@ -70,12 +170,12 @@ const SalesOrderList = ({ sales_orders }) => {
                                                 {sales_order.payments.reduce((total, p) => total + parseFloat(p.amount_paid, 2), 0).toFixed(2)}
                                             </td>
                                             <td className="border border-gray-300 px-6 py-3 space-x-2">
-                                                {/* <Link
-                                                    href={`/point_of_sales/${sales_order.id}/edit`}
+                                                <Link
+                                                    href={`/logistics_orders/${sales_order.id}/edit`}
                                                     className="text-blue-500 hover:underline"
                                                 >
                                                     Edit
-                                                </Link> */}
+                                                </Link>
                                                 <Link
                                                     href={`/logistics_orders/${sales_order.id}`}
                                                     className="text-emerald-500 hover:underline"
@@ -87,6 +187,27 @@ const SalesOrderList = ({ sales_orders }) => {
                                         ))}
                                     </tbody>
                                 </table>
+                                {sales_orders.links && (
+                                    <div className="mt-4 flex justify-center">
+                                    {sales_orders.links.map((link, index) => (
+                                        <button
+                                        key={index}
+                                        onClick={() => {
+                                            if (link.url) {
+                                            router.visit(link.url, {
+                                                preserveState: true,
+                                                preserveScroll: true,
+                                            });
+                                            }
+                                        }}
+                                        className={`mx-1 px-3 py-1 border rounded ${
+                                            link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+                                        }`}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                        ></button>
+                                    ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

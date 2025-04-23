@@ -13,6 +13,11 @@ const Logistics = ({ sizes }) => {
             }
         >
             Logistics
+            {/* Note: 
+            * Filter Functionality
+            * Export Functionality
+            * Use Pagination
+            * Update Order Numbet to add Tracking Number  */}
         </LogisticsLayout>
     );
 };
