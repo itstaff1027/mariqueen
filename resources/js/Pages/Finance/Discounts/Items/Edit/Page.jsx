@@ -5,18 +5,18 @@ import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 
-const CreatedDiscounts = ({ }) => {
-    const { data, setData, post, errors } = useForm({
-        discount_name: '',
-        type: 'fixed',
-        discount_value: '',
-        discount_for: '',
-        is_active: '0'
+const EditDiscountPerItems = ({ discount }) => {
+    const { data, setData, put, errors } = useForm({
+        discount_name: discount.name || '',
+        type: discount.type || 'fixed',
+        discount_value: discount.value || '',
+        discount_for: discount.discount_for || '',
+        is_active: discount.is_active || '0'
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/discounts');
+        put(`/discounts/${discount.id}`);
     };
 
     return (
@@ -104,9 +104,9 @@ const CreatedDiscounts = ({ }) => {
 
                                 <button
                                     type="submit"
-                                    className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 >
-                                    Create Discounts
+                                    Update Discount
                                 </button>
                             </form>
                         </div>
@@ -117,4 +117,4 @@ const CreatedDiscounts = ({ }) => {
     );
 };
 
-export default CreatedDiscounts;
+export default EditDiscountPerItems;

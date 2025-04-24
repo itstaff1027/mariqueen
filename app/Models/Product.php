@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Finance\DiscountPerItems;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -47,5 +48,9 @@ class Product extends Model
     public function size_values()
     {
         return $this->belongsTo(SizeValues::class, 'size_value_id');
+    }
+
+    public function discountedPrice(){
+        return $this->belongsTo(DiscountPerItems::class, 'product_id', 'id');
     }
 }

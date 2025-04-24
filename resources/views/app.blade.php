@@ -16,7 +16,6 @@
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            integrity="sha512-papOiHn64UKXxj2Rm8L+tlUXyKIH+jX7gq/SCXGx+6RLRKx3gZ9NYeHTvA1jTqzHsy9vUQ+/6vZ1Vhbr3U7Xig=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer"
         />

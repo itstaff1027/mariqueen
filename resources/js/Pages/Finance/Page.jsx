@@ -13,6 +13,7 @@ const Finance = ({ sizes }) => {
             }
         >
             Finance
+            NOTE: add discount_for column, Add: CRUD for creating list of Discounted Price each items or per model. Create: BOGO promo functionality
         </FinanceLayout>
     );
 };

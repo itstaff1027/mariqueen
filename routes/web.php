@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Finance\DiscountPerItemsController;
 use App\Http\Controllers\Finance\FinanceMTOOrdersController;
 use App\Http\Controllers\Inventory\InventoryOrderController;
 use App\Http\Controllers\Inventory\MadeToOrderProductsController;
@@ -126,6 +127,9 @@ Route::middleware(['auth','route.authorization'])->group(function () {
 Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/payment_methods', PaymentMethodsController::class);
     Route::resource('/discounts', DiscountsController::class);
+
+    Route::resource('/discount_per_items', DiscountPerItemsController::class);
+
     Route::resource('/finance_orders', FinanceOrdersController::class);
     Route::post('/finance_orders/update/status/{id}', [FinanceOrdersController::class, 'update_status'])->name('finance_orders.update_status');
 

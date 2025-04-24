@@ -21,6 +21,7 @@ const Sales = ({ sizes }) => {
             {/* <h1>add new column shoulder by and packaging type in POS</h1> */}
             {/* <h1> add a packaging type new table for packaging type </h1> */}
             {/* <h1>POS for MTO/pre order</h1> */}
+            Note: Bundle Promo. When Adding/Placing an Order
         </SalesLayout>
     );
 };

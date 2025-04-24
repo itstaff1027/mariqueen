@@ -132,7 +132,9 @@ class PointOfSalesController extends Controller
                     'productVariant.heelHeights', 
                     'productVariant.sizes',
                     'productVariant.size_values',
-                    'productVariant.categories'
+                    'productVariant.categories',
+                    'productVariant.product',
+                    'productVariant.product.discountedPrice'
                 ])
                 ->fromSub(function ($query) use ($warehouseIds) {
                     $query->select(

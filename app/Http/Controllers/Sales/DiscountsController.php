@@ -33,6 +33,7 @@ class DiscountsController extends Controller
             'discount_name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'discount_value' => 'required|string|max:255',
+            'discount_for' => 'required|string|max:255',
             'is_active' => 'required'
         ]);
 
@@ -40,6 +41,7 @@ class DiscountsController extends Controller
             'name' => $request->discount_name,
             'type' => $request->type,
             'value' => $request->discount_value,
+            'discount_for' => $request->discount_for,
             'request' => $request->is_active,
             'created_at' => now()
         ]);
@@ -74,6 +76,7 @@ class DiscountsController extends Controller
             'discount_name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'discount_value' => 'required|string|max:255',
+            'discount_for' => 'required|string|max:255',
             'is_active' => 'required'
         ]);
 
@@ -83,6 +86,7 @@ class DiscountsController extends Controller
             'name' => $request->discount_name,
             'type' => $request->type,
             'value' => $request->discount_value,
+            'discount_for' => $request->discount_for,
             'is_active' => $request->is_active,
             'updated_at' => now()
         ]);

@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Link, usePage, router } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-const DiscountsIndex = ({ discounts }) => {
+const DiscountPerItemsIndex = ({ discounts }) => {
 
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Discounts
+                    Discount Per Items
                 </h2>
             }
         >
@@ -19,7 +19,7 @@ const DiscountsIndex = ({ discounts }) => {
                             <div className="flex justify-between mb-4">
                                 <h1 className="text-lg font-semibold">Discount List</h1>
                                 <Link
-                                    href="/discounts/create"
+                                    href="/discount_per_items/create"
                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                                 >
                                     Create New Discount
@@ -30,10 +30,9 @@ const DiscountsIndex = ({ discounts }) => {
                                 <thead>
                                     <tr>
                                         <th className="border border-gray-300 px-4 py-2">#</th>
-                                        <th className="border border-gray-300 px-4 py-2">Name</th>
-                                        <th className="border border-gray-300 px-4 py-2">Type (Fixed/%)</th>
+                                        <th className="border border-gray-300 px-4 py-2">Product Name</th>
+                                        <th className="border border-gray-300 px-4 py-2">Discount Name</th>
                                         <th className="border border-gray-300 px-4 py-2">Value (Decimal)</th>
-                                        <th className="border border-gray-300 px-4 py-2">Discount For</th>
                                         <th className="border border-gray-300 px-4 py-2">Status</th>
                                         <th className="border border-gray-300 px-4 py-2">Actions</th>
                                     </tr>
@@ -54,20 +53,9 @@ const DiscountsIndex = ({ discounts }) => {
                                                 {discount.value}
                                             </td>
                                             <td className="border border-gray-300 px-4 py-2">
-                                                {discount.discount_for}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">
                                                 {discount.is_active ? 'Active' : 'In-Active'}
                                             </td>
                                             <td className="border border-gray-300 px-4 py-2">
-                                                {( discount.discount_for == 'individual' || discount.discount_for == 'category' ) && (
-                                                    <Link
-                                                        href={route("discount_per_items.create", { discount_id: discount.id })}
-                                                        className="text-yellow-500 hover:underline mr-2"
-                                                    >
-                                                        Assign Item
-                                                    </Link>
-                                                )}
                                                 <Link
                                                     href={`/discounts/${discount.id}/edit`}
                                                     className="text-blue-500 hover:underline mr-2"
@@ -102,4 +90,4 @@ const DiscountsIndex = ({ discounts }) => {
     );
 };
 
-export default DiscountsIndex;
+export default DiscountPerItemsIndex;

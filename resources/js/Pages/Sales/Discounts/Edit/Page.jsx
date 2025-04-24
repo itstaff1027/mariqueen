@@ -10,6 +10,7 @@ const EditDiscounts = ({ discount }) => {
         discount_name: discount.name || '',
         type: discount.type || 'fixed',
         discount_value: discount.value || '',
+        discount_for: discount.discount_for || '',
         is_active: discount.is_active || '0'
     });
 
@@ -68,6 +69,22 @@ const EditDiscounts = ({ discount }) => {
                                         className="w-full"
                                     />
                                     <InputError message={errors.discount_value} />
+                                </div>
+
+                                <div className="mb-6">
+                                    <InputLabel for="discount_for" value="Discount For" />
+                                    <select
+                                        id='discount_for'
+                                        name='discount_for'
+                                        value={data.discount_for}
+                                        onChange={(e) => setData('discount_for', e.target.value)}
+                                    >
+                                        <option value='individual'>Individual</option>
+                                        <option value='bulk'>Bulk</option>
+                                        <option value='special'>Special</option>
+                                        <option value='category'>Category</option>
+                                    </select>
+                                    <InputError message={errors.discount_for} />
                                 </div>
 
                                 <div className="mb-6">
