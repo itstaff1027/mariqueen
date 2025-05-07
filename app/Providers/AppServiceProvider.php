@@ -2,10 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +24,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
-
+        Relation::morphMap([
+            'product'          => \App\Models\Product::class,
+            'product_variant'  => \App\Models\ProductVariant::class,
+            'color'            => \App\Models\Color::class,
+            'category'         => \App\Models\Categories::class,
+            'heel_height'      => \App\Models\HeelHeight::class,
+            // …any other types you use
+          ]);
         // Share global auth data with Inertia
         // Inertia::share('routes', function () {
         //     $user = Auth::user();

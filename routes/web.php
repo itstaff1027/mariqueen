@@ -1,15 +1,5 @@
 <?php
 
-use App\Http\Controllers\Finance\DiscountPerItemsController;
-use App\Http\Controllers\Finance\FinanceMTOOrdersController;
-use App\Http\Controllers\Inventory\InventoryOrderController;
-use App\Http\Controllers\Inventory\MadeToOrderProductsController;
-use App\Http\Controllers\Inventory\PackagingTypeController;
-use App\Http\Controllers\Logistics\LogisticsMTOOrdersController;
-use App\Http\Controllers\Logistics\LogisticsOrderController;
-use App\Http\Controllers\Sales\MadeToOrderController;
-use App\Http\Controllers\Sales\MTOSalesPaymentController;
-use App\Http\Controllers\Sales\SalesPaymentController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -20,23 +10,35 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\Sales\CustomersController;
 use App\Http\Controllers\Sales\DiscountsController;
 use App\Http\Controllers\Sales\SalesOrderController;
+use App\Http\Controllers\Sales\MadeToOrderController;
+use App\Http\Controllers\Finance\PromotionsController;
 use App\Http\Controllers\Inventory\ProductsController;
 use App\Http\Controllers\Logistics\CouriersController;
 use App\Http\Controllers\Sales\PointOfSalesController;
+use App\Http\Controllers\Sales\SalesPaymentController;
 use App\Http\Controllers\GlobalSettings\SizeController;
 use App\Http\Controllers\Inventory\WarehouseController;
 use App\Http\Controllers\GlobalSettings\ColorController;
 use App\Http\Controllers\Inventory\StockLevelController;
 use App\Http\Controllers\Finance\FinanceOrdersController;
+use App\Http\Controllers\Sales\MTOSalesPaymentController;
 use App\Http\Controllers\Finance\PaymentMethodsController;
 use App\Http\Controllers\GlobalSettings\CategoryController;
+use App\Http\Controllers\Inventory\PackagingTypeController;
+use App\Http\Controllers\Sales\SalesOrderReturnsController;
+use App\Http\Controllers\Finance\DiscountPerItemsController;
+use App\Http\Controllers\Finance\FinanceMTOOrdersController;
 use App\Http\Controllers\GlobalSettings\OrderTypeController;
 use App\Http\Controllers\GlobalSettings\SizeValueController;
+use App\Http\Controllers\Inventory\InventoryOrderController;
+use App\Http\Controllers\Logistics\LogisticsOrderController;
 use App\Http\Controllers\GlobalSettings\HeelHeightController;
 use App\Http\Controllers\Inventory\StockTransactionController;
-use App\Http\Controllers\Inventory\AssignUserToWarehouseController;
 use App\Http\Controllers\Inventory\InventoryMTOOrdersController;
-use App\Http\Controllers\Sales\SalesOrderReturnsController;
+use App\Http\Controllers\Logistics\LogisticsMTOOrdersController;
+use App\Http\Controllers\Inventory\MadeToOrderProductsController;
+use App\Http\Controllers\Inventory\AssignUserToWarehouseController;
+use App\Http\Controllers\Finance\Conditions\PromotionConditionConroller;
 
 Route::get('/', function () {
     return Redirect()->route('login');
@@ -129,6 +131,9 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::resource('/discounts', DiscountsController::class);
 
     Route::resource('/discount_per_items', DiscountPerItemsController::class);
+
+    Route::resource('/promotions', PromotionsController::class);
+    Route::resource('/promotion_conditions', PromotionConditionConroller::class);
 
     Route::resource('/finance_orders', FinanceOrdersController::class);
     Route::post('/finance_orders/update/status/{id}', [FinanceOrdersController::class, 'update_status'])->name('finance_orders.update_status');

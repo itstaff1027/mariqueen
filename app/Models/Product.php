@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Finance\DiscountPerItems;
+use App\Models\Finance\Promotions;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Finance\DiscountPerItems;
 use Illuminate\Notifications\Notifiable;
+// use App\Models\Finance\PromotionConditions;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
@@ -52,5 +55,19 @@ class Product extends Model
 
     public function discountedPrice(){
         return $this->belongsTo(DiscountPerItems::class, 'product_id', 'id');
+    }
+
+    // public function hasPromotion(){
+    //     return $this->belongsTo(PromotionConditions::class, 'id', 'conditional_id');
+    // }
+
+    public function promotionConditions(): MorphMany
+    {
+        return $this->morphMany(
+          \App\Models\Finance\PromotionConditions::class,
+          'conditional',       // matches your  conditional_type / conditional_id columns
+          'conditional_type',
+          'conditional_id'
+        );
     }
 }

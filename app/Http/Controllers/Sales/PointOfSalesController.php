@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Sales;
 
 
+use App\Http\Resources\Inventory\Stocks\StockMovementResources;
+use App\Http\Resources\Sales\Stocks\PointOfSaleStockResources;
 use App\Models\Size;
 use App\Models\User;
 use App\Models\Color;
@@ -110,7 +112,7 @@ class PointOfSalesController extends Controller
         $warehouseIds = $user->user_warehouse->pluck('id')->toArray();
 
         // count(): Argument #1 ($value) must be of type Countable|array, int given 
-
+        // dd(StockMovementResources::collection(StockMovements::all()));
         // dd($warehouseIds);
         $color = Color::all();
         $heel_height = HeelHeight::all();
@@ -128,13 +130,19 @@ class PointOfSalesController extends Controller
                     DB::raw("SUM(stock_change) as total_stock")
                 )
                 ->with([
+                    'productVariant',
                     'productVariant.colors', 
                     'productVariant.heelHeights', 
                     'productVariant.sizes',
                     'productVariant.size_values',
                     'productVariant.categories',
                     'productVariant.product',
-                    'productVariant.product.discountedPrice'
+                    'productVariant.promotionConditions.promotion',
+                    'productVariant.product.promotionConditions.promotion',
+                    'productVariant.colors.promotionConditions.promotion',
+                    'productVariant.heelHeights.promotionConditions.promotion',
+                    'productVariant.categories.promotionConditions.promotion',
+                    
                 ])
                 ->fromSub(function ($query) use ($warehouseIds) {
                     $query->select(
@@ -164,7 +172,7 @@ class PointOfSalesController extends Controller
                 ->get();
 
         return inertia('Sales/PointOfSales/Create/Page', [
-            'stock_levels' => $stock_levels,
+            'stock_lvls' => $stock_levels,
             'colors' => $color,
             'heel_heights' => $heel_height,
             'sizes' => $sizes,
@@ -175,7 +183,8 @@ class PointOfSalesController extends Controller
             'payment_methods' => $payment_methods,
             'discounts' => Discounts::all(),
             'customers' => Customers::all(),
-            'packaging_types' => PackagingTypes::all()
+            'packaging_types' => PackagingTypes::all(),
+            'stock_levels' => PointOfSaleStockResources::collection($stock_levels)
         ]);
     }
 
@@ -216,7 +225,7 @@ class PointOfSalesController extends Controller
                 'order_number' => 'SO-' . str_pad(SalesOrders::max('id') + 1, 6, '0', STR_PAD_LEFT), // Generate a unique order number.
                 'customer_id' => $request->customer_id,
                 'warehouse_id' => $warehouseIds[0],
-                'discount_id' => $request->discount_id,
+                'promotion_id' => $request->promotion_id,
                 'courier_id' => $request->courier_id,
                 'shipping_cost' => $request->shipping_cost,
                 'rush_order_fee' => $request->rush_order_fee ? $request->rush_order_fee : 0,
@@ -237,15 +246,14 @@ class PointOfSalesController extends Controller
                 $quantity = $items['quantity'];
                 $stockMovementsToInsert = [];
 
-
                 $saleOrderItemsToInsert[] = [
                     'sales_order_id' => $order->id,
                     'product_variant_id' => $product_variant_id,
-                    'discount_id' => $items['discount_id'],
+                    'promotion_id' => $items['promotion_id'],
                     'quantity' => $items['quantity'],
                     'unit_price' => $items['unit_price'],
                     'total_price' => $items['subtotal'],
-                    'discount_amount' => 0
+                    'discount_amount' => $items['discount_price']
                 ];
 
                 for($i = 0; $i < $quantity; $i++) {

@@ -1,12 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { usePage, useForm, Link } from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
 import { Textarea } from '@headlessui/react';
 import InputError from '@/Components/InputError';
+import PromotionModal from '@/Components/Pages/PromotionModal';
+import ProductFilters from '@/Components/Pages/Sales/PointOfSales/ProductFilters'
+
+// const CartContext = createContext();
+// export function useCart() {
+//     return useContext(CartContext);
+// }
+
+// function CartProvider({ children }){
+
+//     const { data, setData } = useForm({ cart: [] });
+
+//     const totalAmount = useMemo(
+//         () => data.cart.reduce((sum, i) => sum + i.subtotal, 0),
+//         [data.cart]
+//     );
+
+//     function addToCart(item) {
+//         setData('cart', cart => {
+//             const idx = cart.findIndex(i => i.sku === item.sku);
+//             if (idx > -1) {
+//                 const copy = [...cart];
+//                 if(copy[idx].quantity < item.total_stock){
+//                     copy[idx].quantity++;
+//                     copy[idx].subtotal += item.unit_price;
+//                 }
+//                 return copy;
+//             }
+//             return [...cart, { ...item, quantity: 1, subtotal: item.unit_price }]
+//         })
+//     }
+
+//     function updateQuantity(sku, delta) {
+//         setData('cart', cart => 
+//             cart.map(i => {
+//                 if (i.sku === sku) {
+//                     const q = Math.max(1, i.quantity + delta);
+//                     return { ...i, quantity: q, subtotal: q * i.unit_price};
+//                 }
+//                 return i;
+//             }).filter(i => i.quantity > 0)
+//         )
+//     }
+
+//     const value = { data, addToCart, updateQuantity, totalAmount };
+//     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+// }
+
 
 const POS = ({ 
-    stock_levels, 
+    stock_lvls, 
     colors, 
     heel_heights, 
     sizes, 
@@ -17,7 +65,8 @@ const POS = ({
     payment_methods,
     discounts,
     customers,
-    packaging_types
+    packaging_types,
+    stock_levels
 }) => {
     
     const { data, setData, post, errors } = useForm({
@@ -41,9 +90,38 @@ const POS = ({
     });
     
     const [search, setSearch] = useState("");
+    const [filters, setFilters] = useState({});
     const [customerSearch, setCustomerSearch] = useState("");
     const [customerDropdownVisible, setCustomerDropdownVisible] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [isClickedPromotion, setIsClickedPromotion] = useState(false);
+
+    const stock = useMemo(() => {
+        return stock_levels.data
+          .filter(stock => {
+            
+            const matchesFilters = (
+                (!filters.category || stock.category === filters.category) &&
+                (!filters.size || stock.size_name === filters.size) &&
+                (!filters.size_values || stock.size_value === filters.size_values) &&
+                (!filters.heelHeight || stock.heel_height === filters.heelHeight) &&
+                (!filters.color || stock.color_name === filters.color)
+            );
+    
+            // console.log(matchesFilters);
+        
+            const matchesSearch = search === "" || 
+                stock.product_sku.toLowerCase().includes(search.toLowerCase()) ||
+                stock.color_name.toLowerCase().includes(search.toLowerCase()) ||
+                stock.category.toLowerCase().includes(search.toLowerCase());
+        
+            return matchesFilters && matchesSearch;
+          })
+      }, [stock_lvls, filters, search]);
+
+    const openPromotionModal = () => {
+        setIsClickedPromotion(true);
+    };
 
     // Filtering logic for customers
     const getFilteredCustomers = () => {
@@ -62,102 +140,124 @@ const POS = ({
 
     // Add to Cart with Discount Handling
     const addToCart = (stock) => {
-        const unitPrice = parseFloat(stock.product_variant.discount_price) || parseFloat(stock.product_variant.unit_price) || 0;
-    
-        const existingItemIndex = data.cart.findIndex(item => item.sku === stock.product_variant.sku);
-    
-        let updatedCart = [...data.cart];
-    
-        if (existingItemIndex !== -1) {
-            if (updatedCart[existingItemIndex].quantity < stock.total_stock) {
-                updatedCart[existingItemIndex] = {
-                    ...updatedCart[existingItemIndex],
-                    discount_id: updatedCart[existingItemIndex].discount_id,
-                    discount_value: updatedCart[existingItemIndex].discount_value,
-                    quantity: updatedCart[existingItemIndex].quantity + 1,
-                    subtotal: updatedCart[existingItemIndex].subtotal + unitPrice
-                };
-            }
+        console.log(stock);
+        // 1️⃣ Decide which price we’re actually selling at:
+        const disc = stock.discount_price != null
+          ? parseFloat(stock.discount_price)
+          : null;
+        const unit = parseFloat(stock.unit_price) || 0;
+        const price = disc !== null ? disc : unit;
+      
+        // 2️⃣ Try to find an existing line with the same SKU *and* the same price
+        const existingIndex = data.cart.findIndex(line =>
+          line.sku === stock.product_sku
+          && line.price === price
+        );
+
+        const totalForThisSku = data.cart.reduce((sum, line) => {
+            return line.sku === stock.product_sku
+              ? sum + line.quantity
+              : sum;
+          }, 0);
+        // 3️⃣ Clone and update
+        const updated = [...data.cart];
+        if (existingIndex > -1) {
+          // only bump quantity if stock allows
+          const line = updated[existingIndex];
+          if (totalForThisSku < stock.total_stock) {
+            line.quantity++;
+            line.subtotal += price;
+          }
         } else {
-            updatedCart.push({
-                // ...stock.product_variant,
-                product_variant_id: stock.product_variant.id,
-                product_id: stock.product_variant.product_id,
-                sku: stock.product_variant.sku,
-                unit_price: stock.product_variant.unit_price,
-                discount_id: '',
-                discount_value: 0,
-                promotion_id: 0,
-                quantity: 1,
-                total_stock: stock.total_stock,
-                subtotal: unitPrice,
-            });
+          // 4️⃣ push a brand-new line, including our `price` field
+          if(totalForThisSku < stock.total_stock){
+            updated.push({
+                sku:           stock.product_sku,
+                product_id:    stock.product_id,
+                product_variant_id: stock.product_variant_id,
+                unit_price:    unit,
+                discount_price: disc,     // keep around for reference
+                price,                    // this is what we compare on
+                quantity:      1,
+                total_stock:   stock.total_stock,
+                subtotal:      price,
+                promotion_id: stock.promotion_id ? stock.promotion_id : null,
+                // …any other fields you need (e.g. discount_id, promotion_id)…
+              });
+          }
+          
         }
-    
-        setData('cart', updatedCart);
-    };
-    
+      
+        setData('cart', updated);
+      };
 
     // Increment Quantity in Cart
-    const incrementQuantity = (sku) => {
+    const incrementQuantity = (sku, promotion_id) => {
+        // 1️⃣ Sum every line with this SKU (regardless of price/promo)
+        const totalForThisSku = data.cart.reduce((sum, line) => {
+          return line.sku === sku
+            ? sum + line.quantity
+            : sum;
+        }, 0);
+      
+        // 2️⃣ Map over your cart, bumping *only* the matching line if there's room
         const updatedCart = data.cart.map(item => {
-            if (item.sku === sku && item.quantity < item.total_stock) {
-                const newQuantity = item.quantity + 1;
-                const unitPrice = parseFloat(item.discount_price) || parseFloat(item.unit_price);
-                let newUnitPrice = 0
-                if(item.discount_id){
-                    newUnitPrice = unitPrice * (1 - item.discount_value)
+            // target the exact line (same sku & same promo entry)
+            if (item.sku === sku && item.promotion_id === promotion_id) {
+                // if we’ve already hit (or exceeded) stock, don’t increment
+                if (totalForThisSku >= item.total_stock) {
+                return item;
                 }
-                else {
-                    newUnitPrice = unitPrice
-                }
-
-                return { 
-                    ...item, 
-                    quantity: newQuantity, 
-                    subtotal: newQuantity * newUnitPrice
+        
+                // otherwise bump
+                const newQty = item.quantity + 1;
+                const price = parseFloat(item.discount_price ?? item.unit_price) || 0;
+                return {
+                ...item,
+                quantity: newQty,
+                subtotal: newQty * price,
                 };
             }
+        
+            // leave every other line untouched
             return item;
         });
-
+      
         setData('cart', updatedCart);
     };
 
     // Decrement Quantity in Cart
-    const decrementQuantity = (sku) => {
+    const decrementQuantity = (sku, promotion_id) => {
+        // 1️⃣ Sum every line with this SKU (regardless of price/promo)
+        const totalForThisSku = data.cart.reduce((sum, line) => {
+            return line.sku === sku
+              ? sum + line.quantity
+              : sum;
+          }, 0);
+
         let updatedCart = data.cart.map(item => {
             if (item.sku === sku && item.quantity > 1) {
-                const newQuantity = item.quantity - 1;
-                const unitPrice = parseFloat(item.discount_price) || parseFloat(item.unit_price);
-                let newUnitPrice = 0
-                if(item.discount_id){
-                    newUnitPrice = unitPrice * (1 - item.discount_value)
-                }
-                else {
-                    newUnitPrice = unitPrice
-                }
-                return { 
-                    ...item, 
-                    quantity: newQuantity, 
-                    subtotal: newQuantity * newUnitPrice 
+                const newQty = item.quantity - 1;
+                const price = parseFloat(item.discount_price ?? item.unit_price) || 0;
+                return {
+                    ...item,
+                    quantity: newQty,
+                    subtotal: newQty * price,
                 };
             }
             return item;
         });
-
-        // Remove items with quantity 0 or less
-        updatedCart = updatedCart.filter(item => item.quantity > 0);
 
         setData('cart', updatedCart);
     };
 
     // Remove item from cart
-    const removeFromCart = (sku) => {
-
-        let updatedCart = data.cart.filter((item) => item.sku !== sku);
-
-        setData('cart', updatedCart);
+    const removeFromCart = (sku, promotion_id) => {
+        setData('cart', data.cart.filter(item =>
+            // keep this item if it does not match BOTH sku and promotion_id
+            item.sku  !== sku ||
+            item.promotion_id !== promotion_id
+          ));
     };
 
     const addDiscount = (discount_id) => {
@@ -165,9 +265,14 @@ const POS = ({
         
         const foundDiscount = discounts.find(d => d.id == discount_id);
         if (!foundDiscount) {
-          console.error("Discount not found for id", discount_id);
-          return;
+            setData('discount_id', 0);
+            setData('fixed_discount', 0)
+            console.error("Discount not found for id", discount_id);
+            return;
         }
+        // console.log(foundDiscount + 'passed discount_id');
+        // console.log(discount_id + 'passed parameter');
+        // console.log(data.discount_id);
         // discount_value is already a decimal, e.g., 0.1 for 10%
         if(data.discount_id != discount_id){
             if(foundDiscount.type === 'percentage') {
@@ -236,26 +341,6 @@ const POS = ({
     const grandTotal = totalAmount + parseFloat(data.shipping_cost || 0) + parseFloat(data.rush_order_fee || 0) - fixedDiscount;
     // grandTotal = (data.discount_id ? grandTotal * discounts.some(d => d.id === data.discount_id).value : 1)
     const balance = data.payment_amount - grandTotal;
-
-    // Filter products based on warehouse and other criteria
-    const filteredProducts = stock_levels.filter(stock => {
-        const matchesFilters = (
-            (!data.filters.category || stock.product_variant.category_id === parseInt(data.filters.category)) &&
-            (!data.filters.size || stock.product_variant.size_id === parseInt(data.filters.size)) &&
-            (!data.filters.size_values || stock.product_variant.size_value_id === parseInt(data.filters.size_values)) &&
-            (!data.filters.heelHeight || stock.product_variant.heel_height_id === parseInt(data.filters.heelHeight)) &&
-            (!data.filters.color || stock.product_variant.color_id === parseInt(data.filters.color))
-        );
-
-        // console.log(matchesFilters);
-    
-        const matchesSearch = search === "" || 
-            stock.product_variant.sku.toLowerCase().includes(search.toLowerCase()) ||
-            stock.product_variant.colors.color_name.toLowerCase().includes(search.toLowerCase()) ||
-            stock.product_variant.categories.category_name.toLowerCase().includes(search.toLowerCase());
-    
-        return matchesFilters && matchesSearch;
-    });
     
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -288,8 +373,9 @@ const POS = ({
     };
 
     useEffect(() => {
-        console.log(stock_levels)
-        console.log(data.fixed_discount)
+        // console.log(stock_levels)
+        // console.log(stock_lvls)
+        console.log(data.cart)
         setData((prevData) => ({
             ...prevData,
             total_amount: totalAmount,
@@ -307,136 +393,92 @@ const POS = ({
         >
             <div className="grid grid-cols-3 gap-4 p-4">
                 {/* Filters */}
-                <div className="col-span-3 mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-                    <select
-                        value={data.filters.category || ''}
-                        className="rounded-md border p-2 shadow-sm focus:outline-none"
-                        onChange={(e) =>
-                            setData('filters', {
-                                ...data.filters,
-                                category: e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null,
-                            })
-                        }
-                    >
-                        <option value="">All Categories</option>
-                        {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.category_name}
-                            </option>
-                        ))}
-                    </select>
 
-                    <select
-                        value={data.filters.size || ''}
-                        className="rounded-md border p-2 shadow-sm focus:outline-none"
-                        onChange={(e) =>
-                            setData('filters', {
-                                ...data.filters,
-                                size: e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null,
-                            })
-                        }
-                    >
-                        <option value="">All Sizes</option>
-                        {sizes.map((size) => (
-                            <option key={size.id} value={size.id}>
-                                {size.size_name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={data.filters.size_values || ''}
-                        className="rounded-md border p-2 shadow-sm focus:outline-none"
-                        onChange={(e) =>
-                            setData('filters', {
-                                ...data.filters,
-                                size_values: e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null,
-                            })
-                        }
-                    >
-                        <option value="">Size Values</option>
-                        {size_values.map((size_value) => (
-                            <option key={size_value.id} value={size_value.id}>
-                                {size_value.size_values}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={data.filters.heelHeight || ''}
-                        className="rounded-md border p-2 shadow-sm focus:outline-none"
-                        onChange={(e) =>
-                            setData('filters', {
-                                ...data.filters,
-                                heelHeight: e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null,
-                            })
-                        }
-                    >
-                        <option value="">All Heel Heights</option>
-                        {heel_heights.map((height) => (
-                            <option key={height.id} value={height.id}>
-                                {height.value}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={data.filters.color || ''}
-                        className="rounded-md border p-2 shadow-sm focus:outline-none"
-                        onChange={(e) =>
-                            setData('filters', {
-                                ...data.filters,
-                                color: e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null,
-                            })
-                        }
-                    >
-                        <option value="">All Colors</option>
-                        {colors.map((color) => (
-                            <option key={color.id} value={color.id}>
-                                {color.color_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <ProductFilters
+                    filters={filters}
+                    onFilterChange={setFilters}
+                    search={search}
+                    onSearchChange={setSearch}
+                    colors={colors}
+                    sizes={sizes}
+                    heelHeights={heel_heights}
+                    sizeValues={size_values}
+                    categories={categories}
+                />
 
                 <div className="col-span-2 rounded-md border p-4 shadow-md">
-                    <input
-                        type="text"
-                        placeholder="Search for a product..."
-                        className="w-full rounded-md border p-2"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+                    <div className="py-4 w-full">
+                        <div className="space-x-4">
+                            <Link
+                                href="/customers/create"
+                                className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                            >
+                                New Customer
+                            </Link>
+                            <button
+                                // href="/customers/create"
+                                className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                                onClick={() => openPromotionModal()}
+                            >
+                                Bundle/BOGO Modal
+                            </button>
+                        </div>
+                        
+                    </div>
                     <div className="mt-4 grid grid-cols-3 gap-4">
-                        {filteredProducts.map((stock, index) => (
-                            <div key={index} className="rounded-md border p-4">
-                                <h3 className="text-lg font-semibold">
-                                    SKU: {stock.product_variant.sku}
-                                </h3>
+                        {stock.map((stock, index) => (
+                            <div key={index} className="w-full flex flex-col rounded-md border p-4">
+                                <div className="flex w-full">
+                                    <div className="w-1/2 border">
+                                        <img src="" alt="text" className="w-full h-1/2 border" />
+                                    </div>
+                                    <div className="w-1/2 text-right">
+                                        <h3 className="text-lg font-semibold">
+                                            <u>{stock.product_sku}</u>
+                                        </h3>
+                                        <h3 className="text-lg font-semibold">
+                                            <u>{stock.product_name}</u>
+                                        </h3>
+                                        <h3 className="text-lg font-semibold">
+                                            <u>{stock.color_name}</u>
+                                        </h3>
+                                        <h3 className="text-lg font-semibold">
+                                            S: <u>{stock.size_value}</u>
+                                        </h3>
+                                        <h3 className="text-lg font-semibold">
+                                            IN: <u>{stock.heel_height}</u>
+                                        </h3>
+                                        
+                                    </div>
+                                </div>
                                 <p className="text-sm text-gray-500">
-                                    Stock: {stock.total_stock}
+                                   Stock Left - <u> {stock.total_stock}</u>
                                 </p>
+                                
                                 <p className="mt-2 text-lg font-bold">
                                     ₱
-                                    {stock.product_variant.discount_price ||
-                                        stock.product_variant.unit_price}
+                                    {
+                                        stock.unit_price 
+                                    }
                                 </p>
-                                <button
-                                    onClick={() => addToCart(stock)}
-                                    className="mt-2 rounded-md bg-blue-500 px-4 py-2 text-white"
-                                >
-                                    Add to Cart
-                                </button>
+                                
+                                {
+                                    stock.promotions.length > 0 ? 
+                                    <select>
+                                        <option onClick = {() => addToCart(stock)}>Add as SRP</option>
+                                        {
+                                            stock.promotions?.map((promo) => (
+                                                <option key={promo.id} onClick={() => addToCart({...stock, discount_price: promo.type == 'discount' ? parseFloat(stock.unit_price) * (1 - parseFloat(promo.discount_value)) : 0, promotion_id: promo.id})}>{promo.name}</option>
+                                            ))
+                                        }
+                                    </select> : <button
+                                        onClick={() => addToCart(stock)}
+                                        className="mt-2 rounded-md bg-blue-500 px-4 py-2 text-white"
+                                    >
+                                        Add
+                                    </button>
+                                }
+                                
                             </div>
                         ))}
                     </div>
@@ -464,17 +506,21 @@ const POS = ({
                                         )}
                                     </span>
                                     <div className="flex items-center">
+                                        {
+                                            item.quantity !== 1 && <button
+                                                onClick={() =>
+                                                    decrementQuantity(item.sku)
+                                                }
+                                                className="mx-1 rounded-md bg-gray-300 px-2 py-1 text-gray-700"
+                                            >
+                                                -
+                                            </button>
+
+                                        }
+                                        
                                         <button
                                             onClick={() =>
-                                                decrementQuantity(item.sku)
-                                            }
-                                            className="mx-1 rounded-md bg-gray-300 px-2 py-1 text-gray-700"
-                                        >
-                                            -
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                incrementQuantity(item.sku)
+                                                incrementQuantity(item.sku, item.promotion_id)
                                             }
                                             className="mx-1 rounded-md bg-gray-300 px-2 py-1 text-gray-700"
                                         >
@@ -482,7 +528,7 @@ const POS = ({
                                         </button>
                                         <button
                                             onClick={() =>
-                                                removeFromCart(item.sku)
+                                                removeFromCart(item.sku, item.promotion_id)
                                             }
                                             className="ml-2 text-red-500"
                                         >
@@ -500,12 +546,6 @@ const POS = ({
                         </p>
 
                         {/* <h1>KULANG NG FETCHING FOR PROMO, BUNDLES</h1> */}
-                        <Link
-                            href="/customers/create"
-                            className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                        >
-                            New Customer
-                        </Link>
                         <InputLabel for="customer" value="Customer" />
                         <div className="relative">
                             <input
@@ -683,6 +723,28 @@ const POS = ({
                         </Textarea>
                         <InputError message={errors.remarks} />
 
+                        {discounts && data.cart.length > 0 && (
+                            <div className="py-4">
+                                <label className="block text-sm font-medium text-gray-600">
+                                    Apply Discount (Toggle the selected Discount to remove the discount)
+                                </label>
+
+                                <select
+                                    className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    value={data.discount_id}
+                                    // onChange={(e) => addDiscount(e.target.value)}
+                                >
+                                    <option value="0">- No Discount -</option>
+                                    {
+                                        discounts.map((discount, i) => (
+                                            <option key={i} onClick={(e) => addDiscount(discount.id)} value={discount.id}>{discount.name}</option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+                        )}
+
+                        {/* 
                         {discounts && data.cart.length > 0 ? (
                             discounts.map((discount, i) => (
                                 <button
@@ -699,7 +761,7 @@ const POS = ({
                             ))
                         ) : (
                             <h1>No Discounts Available</h1>
-                        )}
+                        )} */}
 
                         <p className="mt-2 text-lg font-bold">
                             Grand Total: ₱{grandTotal.toFixed(2)}
@@ -764,7 +826,11 @@ const POS = ({
                     </div>
                 </div>
             </div>
+            {isClickedPromotion && (
+                <PromotionModal onClose={(close) => setIsClickedPromotion(close)} />
+            )}
         </AuthenticatedLayout>
+        
     );
 };
 

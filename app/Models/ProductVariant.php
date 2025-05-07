@@ -6,6 +6,8 @@ use App\Models\StockMovements;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Finance\PromotionConditions;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductVariant extends Model
@@ -62,6 +64,10 @@ class ProductVariant extends Model
 
     public function stockMovements(){
         return $this->hasMany(StockMovements::class, 'product_variant_id');
+    }
+
+    public function promotionConditions(): MorphMany {
+        return $this->morphMany(PromotionConditions::class, 'conditional', 'conditional_type', 'conditional_id');
     }
 
     // Define Accessors for Each Attribute

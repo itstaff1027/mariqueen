@@ -35,11 +35,11 @@ export default function FinanceLayout({ header, children }) {
             'name': 'Made To Orders',
             'route': 'finance_mto_orders.index'
         },
-        // {
-        //     'id': '4',
-        //     'name': 'Categories',
-        //     'route': 'settings_categories.index'
-        // },
+        {
+            'id': '5',
+            'name': 'Promotions',
+            'route': 'promotions.index'
+        },
         // {
         //     'id': '5',
         //     'name': 'Order Types',
