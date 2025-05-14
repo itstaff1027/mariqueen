@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Services\Analytics\Sales\SalesAnalyticsService;
+use App\Repositories\Analytics\Sales\SalesAnalyticsRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +17,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(SalesAnalyticsRepository::class, function ($app) {
+            return new SalesAnalyticsRepository();
+        });
+
+        $this->app->bind(SalesAnalyticsService::class, function ($app) {
+            return new SalesAnalyticsService(
+                $app->make(SalesAnalyticsRepository::class)
+            );
+        });
     }
 
     /**
@@ -76,21 +86,21 @@ class AppServiceProvider extends ServiceProvider
     //     Vite::prefetch(concurrency: 3);
 
     //     Inertia::share([
-    //         // we’ll still share the user object…
+    //         // we'll still share the user object…
     //         'auth.user' => function () {
     //             return Auth::user()
     //                 ? Auth::user()->only(['id','name','email'])
     //                 : null;
     //         },
 
-    //         // …and now a “can” map of all your route‐abilities:
+    //         // …and now a "can" map of all your route-abilities:
     //         'auth.can' => function () {
     //             $user = Auth::user();
     //             if (! $user) {
     //                 return [];
     //             }
 
-    //             // Grab every distinct route_name you’ve defined in authorized_roles
+    //             // Grab every distinct route_name you've defined in authorized_roles
     //             $abilities = DB::table('authorized_roles')
     //                            ->distinct()
     //                            ->pluck('route_name');

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Sales;
 
 
-use App\Http\Resources\Inventory\Stocks\StockMovementResources;
-use App\Http\Resources\Sales\Stocks\PointOfSaleStockResources;
+use Carbon\Carbon;
 use App\Models\Size;
 use App\Models\User;
 use App\Models\Color;
@@ -31,6 +30,8 @@ use App\Models\Sales\SalesOrderItems;
 use App\Models\Finance\PaymentMethods;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
+use App\Http\Resources\Sales\Stocks\PointOfSaleStockResources;
+use App\Http\Resources\Inventory\Stocks\StockMovementResources;
 
 class PointOfSalesController extends Controller
 {
@@ -238,6 +239,7 @@ class PointOfSalesController extends Controller
                 'packaging_type_id' => $request->packaging_type_id,
                 'shoulder_by' => $request->shoulder_by,
                 'user_id' => auth()->id(),
+                'created_at' => Carbon::now(),
             ]);
 
             $saleOrderItemsToInsert = [];
@@ -253,7 +255,8 @@ class PointOfSalesController extends Controller
                     'quantity' => $items['quantity'],
                     'unit_price' => $items['unit_price'],
                     'total_price' => $items['subtotal'],
-                    'discount_amount' => $items['discount_price']
+                    'discount_amount' => $items['discount_price'],
+                    'created_at' => Carbon::now(),
                 ];
 
                 for($i = 0; $i < $quantity; $i++) {
@@ -264,8 +267,7 @@ class PointOfSalesController extends Controller
                         'quantity' => -1,
                         'movement_type' => 'sale',
                         'remarks' => 'Sold Item From Order #:' . $order->id . ' From Warehouse:' . $user->name,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => Carbon::now(),
                     ];
                 }
                 StockMovements::insert($stockMovementsToInsert);
@@ -286,6 +288,7 @@ class PointOfSalesController extends Controller
                 'payment_method_id' => $request->payment_method_id,
                 'remarks' => $request->remarks,
                 'user_id' => auth()->id(),
+                'created_at' => Carbon::now(),
             ]);
 
             // Get the uploaded files; if only one file is uploaded, ensure it's handled as an array.
@@ -381,7 +384,8 @@ class PointOfSalesController extends Controller
         $sales_order = SalesOrders::findOrFail($id);
 
         $sales_order->update([
-            'remarks' => $request->remarks
+            'remarks' => $request->remarks,
+            'updated_at' => Carbon::now(),
         ]);
 
         return redirect()->route('point_of_sales.index')->with('sucess', 'Successfully Updated Sales Order!');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Analytics\Sales\SalesAnalyticsController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -152,6 +153,10 @@ Route::middleware(['auth','route.authorization'])->group(function () {
     Route::post('/logistics_mto_orders/update/status/{id}', [LogisticsMTOOrdersController::class, 'update_status'])->name('logistics_orders.update_status');
 });
 
+Route::middleware(['auth','route.authorization'])->group(function () {
+    Route::get('/sales_analytics', [SalesAnalyticsController::class, 'index'])->name('sales_analytics_dashboard');
+});
+
 Route::middleware(['route.authorization'])->group(function (){
     Route::get('/settings', function () {
         return Inertia:: render('Settings/Page');
@@ -168,6 +173,9 @@ Route::middleware(['route.authorization'])->group(function (){
     Route::get('/sales', function () {
         return Inertia:: render('Sales/Page');
     })->name('sales');
+    Route::get('/analytics', function () {
+        return Inertia:: render('Analytics/Page');
+    })->name('analytics');
 });
 
 require __DIR__.'/auth.php';
