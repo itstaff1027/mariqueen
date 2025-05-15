@@ -1,20 +1,17 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Seeders;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Seeder;
+use App\Models\Admin\AuthorizedRoles;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AuthorizedRole>
- */
-class AuthorizedRoleFactory extends Factory
+class AuthorizedRoleSeeder extends Seeder
 {
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * Run the database seeds.
      */
-    public function definition(): array
+    public function run(): void
     {
         $route_name = [
             'dashboard',
@@ -36,11 +33,13 @@ class AuthorizedRoleFactory extends Factory
             'admin-user.show',
         ];
 
-        return [
-            'route_name' => $route_name[array_rand($route_name)],
-            'role_id' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
+        foreach ($route_name as $route) {
+            AuthorizedRoles::create([
+                'route_name' => $route,
+                'role_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
-} 
+}
