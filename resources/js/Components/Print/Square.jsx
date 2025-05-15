@@ -82,7 +82,7 @@ const Square = ({ onClose, order }) => {
               >
                   {/* Header with logo and sale date */}
                   <div className="grid grid-cols-2">
-                      {/* {logoBase64 ? (
+                      {logoBase64 ? (
               <img
                 src={logoBase64}
                 alt="Logo"
@@ -90,7 +90,7 @@ const Square = ({ onClose, order }) => {
               />
             ) : (
               <h1 style={{ fontSize: "16pt", fontWeight: "bold" }}>Your Company Logo</h1>
-            )} */}
+            )}
                       <div className="w-full text-right">
                           <h2 style={{ fontSize: '14pt', fontWeight: 'bold' }}>
                               Closed Sale Date:{' '}
