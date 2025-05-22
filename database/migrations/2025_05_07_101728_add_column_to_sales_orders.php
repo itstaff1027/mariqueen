@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -12,10 +13,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sales_orders', function (Blueprint $table) {
-            $table->foreignId('promotion_id')->nullable()->constrained('promotions')->onDelete('set null');
+            $table->foreignId('promotion_id')
+                ->nullable()
+                ->constrained('promotions')
+                ->onDelete('set null');
         });
+
         Schema::table('made_to_orders', function (Blueprint $table) {
-            $table->foreignId('promotion_id')->nullable()->constrained('promotions')->onDelete('set null');
+            $table->foreignId('promotion_id')
+                ->nullable()
+                ->constrained('promotions')
+                ->onDelete('set null');
         });
     }
 
@@ -25,10 +33,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('sales_orders', function (Blueprint $table) {
-            $table->dropColumn('promotion_id');
+            // drops the FK constraint and the column in one go
+            $table->dropConstrainedForeignId('promotion_id');
         });
+
         Schema::table('made_to_orders', function (Blueprint $table) {
-            $table->dropColumn('promotion_id');
+            $table->dropConstrainedForeignId('promotion_id');
         });
     }
 };

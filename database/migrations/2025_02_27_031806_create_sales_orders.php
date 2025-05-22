@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -69,6 +70,7 @@ return new class extends Migration {
         Schema::dropIfExists('promotions');
         Schema::dropIfExists('discounts');
         Schema::dropIfExists('outlets');
+        Schema::dropIfExists('couriers');
         Schema::dropIfExists('payment_methods'); // Now it's safe to drop
     }
 };
