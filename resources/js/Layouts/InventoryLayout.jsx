@@ -6,6 +6,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import AuthenticatedLayout from './AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import SubNavigaiton from '@/Components/UI/Navigation/SubNavigation';
 
 export default function InventoryLayout({ header, children }) {
     const { auth } = usePage().props;
@@ -52,18 +53,22 @@ export default function InventoryLayout({ header, children }) {
             name: 'Made To Order Products',
             route: 'inventory_mto_products.index',
         },
-        ,
         {
             id: '7',
             name: 'Made To Orders',
             route: 'inventory_mto_orders.index',
+        },
+        {
+            id: '8',
+            name: 'Batches',
+            route: 'batches.index',
         },
     ];
 
     const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);
 
     // Then filter your paths:
-    const filteredPaths = allowedRouteNames.length > 0 
+    const filteredPaths = allowedRouteNames.length > 0
         ? paths.filter((path) => allowedRouteNames.includes(path.route))
         : paths;
 
@@ -77,22 +82,12 @@ export default function InventoryLayout({ header, children }) {
         >
             <Head title="Inventory" />
 
+            <SubNavigaiton data={paths} container_styles={''} route_styles={''} />
+
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <div className="flex flex-wrap gap-3 justify-center sm:justify-start p-4">
-                                {paths.map((path, i) => (
-                                    <ResponsiveNavLink 
-                                        href={route(`${path.route}`)}
-                                        active={route().current(`${path.route}`)}
-                                        key={i}
-                                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition"
-                                    >
-                                        {path.name}
-                                    </ResponsiveNavLink>
-                                ))}
-                            </div>
                             {/* {header && (
                                 <header className="bg-white shadow">
                                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -100,7 +95,7 @@ export default function InventoryLayout({ header, children }) {
                                     </div>
                                 </header>
                             )} */}
-            
+
                             <main>{children}</main>
                         </div>
                     </div>

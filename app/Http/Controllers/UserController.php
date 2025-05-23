@@ -43,17 +43,17 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'array', // Array of role IDs
         ]);
-    
+
         // Create the user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-    
+
         // Fetch roles by IDs
         $roles = Role::whereIn('id', $request->roles)->get();
-    
+
         // Assign roles
         if ($roles->isNotEmpty()) {
             $user->syncRoles($roles->pluck('name')->toArray()); // Pass role names
@@ -62,13 +62,13 @@ class UserController extends Controller
         // if($request->roles){
         //     $user->syncRoles($request->roles);
         // }
-    
+
         // Send email verification notification
         $user->sendEmailVerificationNotification();
-    
+
         return redirect()->route('admin-users.index')->with('success', 'User created successfully and verification email sent!');
     }
-    
+
 
     /**
      * Display the specified resource.
@@ -97,8 +97,8 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-         // Validation
-         $request->validate([
+        // Validation
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8|confirmed',

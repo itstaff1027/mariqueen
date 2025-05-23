@@ -24,11 +24,18 @@ class DatabaseSeeder extends Seeder
 
         // Create permissions
         $permissions = [
-            'view sales',
-            'manage inventory',
-            'manage orders',
-            'view analytics',
-            'manage users',
+            'create',
+            'edit',
+            'update',
+            'delete',
+            'show',
+            'view',
+            'view all',
+            'print',
+            'export',
+            'submit',
+            'approve',
+            'reject'
         ];
 
         foreach ($permissions as $permission) {

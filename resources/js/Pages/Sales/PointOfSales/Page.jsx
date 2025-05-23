@@ -20,7 +20,7 @@ const SalesOrderList = ({ sales_orders }) => {
     const openPrintModal = (order) => {
         setPrintModalData(order);
     };
-    
+
     const closePrintModal = () => {
         setPrintModalData(null);
     };
@@ -38,121 +38,121 @@ const SalesOrderList = ({ sales_orders }) => {
           "Payment ID", "Payment Amount", "Excess Amount", "Remaining Balance", "Payment Status", "Payment Method", "Payment Created At",
           "Item ID", "Quantity", "Unit Price", "Total Price", "Discount Amount", "Product SKU", "Product Name", "Color", "Size", "Heel Height"
         ];
-      
+
         // This array will hold all rows.
         let worksheetData = [headerRow];
-        const orderLevelColumns = 15; 
+        const orderLevelColumns = 15;
         let mergeRanges = [];
         let currentRow = 1;
-      
+
         // Loop through each sales order
         sales_orders.data.forEach(order => {
           // Build your order row (order-level data)
-          const orderRow = [
-            order.order_number,
-            order.customers.first_name + ' ' + order.customers.last_name,
-            order.user.name,
-            order.warehouse.name,
-            order.tracking_number,
-            order.courier?.name || "",
-            order.shoulder_by,
-            order.packaging_type?.packaging_name || "",
-            order.shipping_cost,
-            order.rush_order_fee,
-            order.total_amount,
-            order.grand_amount, // or client payment if different
-            order.status,
-            order.created_at,
-            order.updated_at
-          ];
-      
-          // Determine number of rows needed for this order
-          // At least 1 row even if both arrays are empty
-          const numPayments = order.payments ? order.payments.length : 0;
-          const numItems = order.items ? order.items.length : 0;
-          const maxRows = Math.max(1, numPayments, numItems);
-      
-          // For each row required, add payment and item info if available.
-          for (let i = 0; i < maxRows; i++) {
-            const row = [...orderRow]; // copy order-level details
-      
-            // Payment data
-            if (order.payments && order.payments[i]) {
-              let payment = order.payments[i];
-              row.push(
-                payment.id,
-                payment.amount_paid,
-                payment.excess_amount,
-                payment.remaining_balance,
-                payment.status,
-                payment.payment_method?.name || "",
-                payment.created_at
-              );
-            } else {
-              // push empty values if no payment at this index
-              row.push("", "", "", "", "", "", "");
-            }
-      
-            // Item data
-            if (order.items && order.items[i]) {
-              let item = order.items[i];
-              row.push(
-                item.id,
-                item.quantity,
-                item.unit_price,
-                item.total_price,
-                item.discount_amount,
-                item.product_variant?.sku || "",
-                item.product_variant?.product?.product_name || "",
-                item.product_variant?.colors?.color_name || "",
-                item.product_variant?.size_values?.size_values || "",
-                item.product_variant?.heel_heights?.value || "",
-              );
-            } else {
-              // push empty values if no item at this index
-              row.push("", "", "", "", "", "", "", "", "", "");
-            }
+            const orderRow = [
+                order.order_number,
+                order.customers.first_name + ' ' + order.customers.last_name,
+                order.user.name,
+                order.warehouse.name,
+                order.tracking_number,
+                order.courier?.name || "",
+                order.shoulder_by,
+                order.packaging_type?.packaging_name || "",
+                order.shipping_cost,
+                order.rush_order_fee,
+                order.total_amount,
+                order.grand_amount, // or client payment if different
+                order.status,
+                order.created_at,
+                order.updated_at
+            ];
 
-            if (maxRows > 1) {
-                for (let col = 0; col < orderLevelColumns; col++) {
-                  mergeRanges.push({
-                    s: { r: currentRow, c: col },
-                    e: { r: currentRow + maxRows - 1, c: col }
-                  });
+            // Determine number of rows needed for this order
+            // At least 1 row even if both arrays are empty
+            const numPayments = order.payments ? order.payments.length : 0;
+            const numItems = order.items ? order.items.length : 0;
+            const maxRows = Math.max(1, numPayments, numItems);
+
+            // For each row required, add payment and item info if available.
+            for (let i = 0; i < maxRows; i++) {
+                const row = [...orderRow]; // copy order-level details
+
+                // Payment data
+                if (order.payments && order.payments[i]) {
+                    let payment = order.payments[i];
+                    row.push(
+                        payment.id,
+                        payment.amount_paid,
+                        payment.excess_amount,
+                        payment.remaining_balance,
+                        payment.status,
+                        payment.payment_method?.name || "",
+                        payment.created_at
+                    );
+                } else {
+                    // push empty values if no payment at this index
+                    row.push("", "", "", "", "", "", "");
                 }
-              }
-              currentRow += maxRows;
-      
-            worksheetData.push(row);
-          }
+
+                // Item data
+                if (order.items && order.items[i]) {
+                    let item = order.items[i];
+                    row.push(
+                        item.id,
+                        item.quantity,
+                        item.unit_price,
+                        item.total_price,
+                        item.discount_amount,
+                        item.product_variant?.sku || "",
+                        item.product_variant?.product?.product_name || "",
+                        item.product_variant?.colors?.color_name || "",
+                        item.product_variant?.size_values?.size_values || "",
+                        item.product_variant?.heel_heights?.value || "",
+                    );
+                } else {
+                    // push empty values if no item at this index
+                    row.push("", "", "", "", "", "", "", "", "", "");
+                }
+
+                if (maxRows > 1) {
+                    for (let col = 0; col < orderLevelColumns; col++) {
+                        mergeRanges.push({
+                            s: { r: currentRow, c: col },
+                            e: { r: currentRow + maxRows - 1, c: col }
+                        });
+                    }
+                }
+                currentRow += maxRows;
+
+                worksheetData.push(row);
+            }
             // If order spans more than one row, generate merge ranges for order-level columns.
 
         });
-        
+
         // Create worksheet and auto-fit columns as in your original code
         const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      
+
         // Auto-fit columns
         const colWidths = headerRow.map((header, colIndex) => {
-          let maxLength = header ? header.toString().length : 10;
-          worksheetData.forEach((row) => {
-            const cell = row[colIndex];
-            if (cell) {
-              maxLength = Math.max(maxLength, cell.toString().length);
-            }
-          });
-          return { wch: maxLength + 2 };
+            let maxLength = header ? header.toString().length : 10;
+            worksheetData.forEach((row) => {
+                const cell = row[colIndex];
+                if (cell) {
+                    maxLength = Math.max(maxLength, cell.toString().length);
+                }
+            });
+            return { wch: maxLength + 2 };
         });
         worksheet["!cols"] = colWidths;
         worksheet["!merges"] = mergeRanges;
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Transactions");
-      
+
         // Generate filename based on the current date.
         XLSX.writeFile(workbook, `Sales_Orders_${new Date().toISOString().split("T")[0]}.xlsx`);
-      };
-      
-    
+    };
+
+
     return(
         <AuthenticatedLayout
             header={
@@ -177,7 +177,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                                 Create Order
                                             </Link>
 
-                                            <button 
+                                            <button
                                                 onClick={exportExcel}
                                                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
                                             >
@@ -210,7 +210,7 @@ const SalesOrderList = ({ sales_orders }) => {
                                         >
                                             Filter
                                         </button>
-                                        
+
                                     </div>
                                     <div className="w-full relative m-0">
                                         <input
@@ -238,38 +238,38 @@ const SalesOrderList = ({ sales_orders }) => {
                                     </thead>
                                     <tbody>
                                         {sales_orders.data?.map((sales_order, index) => (
-                                        <tr key={sales_order.id}>
-                                            <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{sales_order.order_number}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{sales_order.customers.first_name} {sales_order.customers.last_name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{sales_order.tracking_number ? sales_order.tracking_number : 'No Tracking # added yet.'}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{sales_order.status}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{sales_order.grand_amount}</td>
-                                            <td className="border border-gray-300 px-4 py-2">
-                                                {sales_order.payments.reduce((total, p) => total + parseFloat(p.amount_paid, 2), 0).toFixed(2)}
-                                            </td>
-                                            <td className="border border-gray-300 px-4 py-2">{sales_order.balance}</td>
-                                            <td className="border border-gray-300 px-6 py-3 space-x-2">
-                                                <button
-                                                    onClick={() => openPrintModal(sales_order)}
-                                                    className="p-2 rounded-xl text-red-500 hover:underline"
-                                                >
-                                                    Print
-                                                </button>
-                                                <Link
-                                                    href={`/point_of_sales/${sales_order.id}/edit`}
-                                                    className="text-blue-500 hover:underline"
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <Link
-                                                    href={`/point_of_sales/${sales_order.id}`}
-                                                    className="text-emerald-500 hover:underline"
-                                                >
-                                                    View
-                                                </Link>
-                                            </td>
-                                        </tr>
+                                            <tr key={sales_order.id}>
+                                                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{sales_order.order_number}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{sales_order.customers.first_name} {sales_order.customers.last_name}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{sales_order.tracking_number ? sales_order.tracking_number : 'No Tracking # added yet.'}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{sales_order.status}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{sales_order.grand_amount}</td>
+                                                <td className="border border-gray-300 px-4 py-2">
+                                                    {sales_order.payments.reduce((total, p) => total + parseFloat(p.amount_paid, 2), 0).toFixed(2)}
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2">{sales_order.balance}</td>
+                                                <td className="border border-gray-300 px-6 py-3 space-x-2">
+                                                    <button
+                                                        onClick={() => openPrintModal(sales_order)}
+                                                        className="p-2 rounded-xl text-red-500 hover:underline"
+                                                    >
+                                                        Print
+                                                    </button>
+                                                    <Link
+                                                        href={`/point_of_sales/${sales_order.id}/edit`}
+                                                        className="text-blue-500 hover:underline"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                    <Link
+                                                        href={`/point_of_sales/${sales_order.id}`}
+                                                        className="text-emerald-500 hover:underline"
+                                                    >
+                                                        View
+                                                    </Link>
+                                                </td>
+                                            </tr>
                                         ))}
                                     </tbody>
                                 </table>
@@ -280,15 +280,15 @@ const SalesOrderList = ({ sales_orders }) => {
                                                 key={index}
                                                 onClick={() => {
                                                     if (link.url) {
-                                                            router.visit(link.url, {
+                                                        router.visit(link.url, {
                                                             preserveState: true,
                                                             preserveScroll: true,
                                                         });
                                                     }
                                                 }}
                                                 className={`mx-1 px-3 py-1 border rounded ${
-                                                link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
-                                                }`}
+link.active ? 'bg-blue-500 text-white' : 'bg-white text-blue-500'
+}`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             ></button>
                                         ))}
