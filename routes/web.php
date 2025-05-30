@@ -103,6 +103,8 @@ Route::middleware(['auth', 'route.authorization'])->group(function () {
     Route::resource('/inventory_packaging_types', PackagingTypeController::class);
 
     Route::resource('/inventory/batches', BatchController::class);
+
+    Route::resource('/inventory/batches', BatchController::class);
 });
 
 Route::middleware(['auth', 'route.authorization'])->group(function () {

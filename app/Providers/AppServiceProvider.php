@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Services\Analytics\Sales\SalesAnalyticsService;
 use App\Repositories\Analytics\Sales\SalesAnalyticsRepository;
+use App\Repositories\Inventory\Batches\BatchRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(SalesAnalyticsRepository::class)
             );
         });
+        
+        $this->app->bind(BatchRepository::class, function ($app) {
+            return new BatchRepository();
+        });
+
     }
 
     /**

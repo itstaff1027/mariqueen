@@ -19,6 +19,11 @@ class BatchRepository
         return Batches::with(['user', 'warehouse'])->paginate($pagination_value);
     }
 
+    public function getBatchWithWarehouse($batch_id)
+    {
+        return Batches::with(['warehouse'])->findOrFail($batch_id);
+    }
+
     public function getBatchWithSerialNumbers()
     {
         return Batches::with('serialNumbers')->paginate(5);

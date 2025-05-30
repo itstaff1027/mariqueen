@@ -75,9 +75,9 @@ export default function InventoryLayout({ header, children }) {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Inventory
-                </h2>
+                <div className="w-full text-xl font-semibold leading-tight text-gray-800">
+                    {header || ''}
+                </div>
             }
         >
             <Head title="Inventory" />

@@ -16,17 +16,35 @@ return new class extends Migration
             $table->string('batch_number', 255)->unique();
             $table->date('manufacturing_date');
             $table->date('expiry_date');
-            $table->date('received_date');
-            $table->text('description', 1000);
+            $table->date('received_date')->nullable();
+            $table->text('description')->nullable();
             $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
 
         Schema::create('serial_numbers', function (Blueprint $table) {
             $table->id();
-            $table->string('serial_number', 255)->unique();
+            $table->foreignId('batch_id')->nullable()->constrained('batches')->onDelete('restrict');
+            $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('restrict');
+            $table->string('serial_number')->unique();
+            $table->enum('status', [
+                'in_stock',
+                'sold',
+                'returned',
+                'damaged',
+                'replacement',
+                'repaired',
+                'lost',
+                'expired',
+                'invalid'
+            ]);
             $table->integer('quantity');
+            $table->foreignId('warehouse_id')->nullabel()->constrained('warehouses')->onDelete('restrict');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
         });
 

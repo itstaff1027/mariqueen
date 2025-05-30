@@ -40,7 +40,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);
 
     // Then filter your paths:
-    const filteredPaths = allowedRouteNames.length > 0 
+    const filteredPaths = allowedRouteNames.length > 0
         ? paths.filter((path) => allowedRouteNames.includes(path.route))
         : [];
 
@@ -60,7 +60,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             href={route(path.route)}
                             className={`block p-3 rounded-md text-gray-700 hover:bg-gray-200 ${route().current(path.route) ? 'bg-gray-300' : ''}`}
                         >
-                            {collapsed 
+                            {collapsed
                                 ? <div className="flex text-center">{path.collapsed_name}</div>
                                 : path.name
                             }
@@ -94,8 +94,8 @@ export default function AuthenticatedLayout({ header, children }) {
             </div>
             <div className="flex-1">
                 {header && (
-                    <header className="bg-white shadow">
-                        <div className="flex mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <header className="bg-white shadow w-full">
+                        <div className="flex mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
                             <button
                                 onClick={() => setCollapsed(!collapsed)}
                                 className="text-gray-600 hover:text-gray-800"
