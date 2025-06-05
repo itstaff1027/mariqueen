@@ -464,14 +464,20 @@ const POS = ({
                                 
                                 {
                                     stock.promotions.length > 0 ? 
-                                    <select>
-                                        <option onClick = {() => addToCart(stock)}>Add as SRP</option>
+                                    (<>
+                                        <button
+                                            onClick={() => addToCart(stock)}
+                                            className="mt-2 rounded-md bg-blue-500 px-4 py-2 text-white"
+                                        >
+                                            Add
+                                        </button>
                                         {
                                             stock.promotions?.map((promo) => (
-                                                <option key={promo.id} onClick={() => addToCart({...stock, discount_price: promo.type == 'discount' ? parseFloat(stock.unit_price) * (1 - parseFloat(promo.discount_value)) : 0, promotion_id: promo.id})}>{promo.name}</option>
-                                            ))
-                                        }
-                                    </select> : <button
+                                                <button type="button" key={promo.id} onClick={() => addToCart({...stock, discount_price: promo.type == 'discount' ? parseFloat(stock.unit_price) * (1 - parseFloat(promo.discount_value)) : 0, promotion_id: promo.id})}
+                                                    className="mt-2 rounded-md bg-blue-500 px-4 py-2 text-white"
+                                                >{promo.name}</button>
+                                        ))}
+                                    </>) : <button
                                         onClick={() => addToCart(stock)}
                                         className="mt-2 rounded-md bg-blue-500 px-4 py-2 text-white"
                                     >
@@ -737,7 +743,7 @@ const POS = ({
                                     <option value="0">- No Discount -</option>
                                     {
                                         discounts.map((discount, i) => (
-                                            <option key={i} onClick={(e) => addDiscount(discount.id)} value={discount.id}>{discount.name}</option>
+                                            <option key={i} ><button type="button" onClick={(e) => addDiscount(discount.id)} value={discount.id}>{discount.name}</button></option>
                                         ))
                                     }
                                 </select>
