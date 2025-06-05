@@ -20,6 +20,7 @@ class StockTransactions extends Model
         'transaction_type',
         'status',
         'remarks',
+        'batch_id'
     ];
 
     public function logs()

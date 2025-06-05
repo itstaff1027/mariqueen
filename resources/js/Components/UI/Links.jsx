@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckIcon, PencilIcon, RefreshCwIcon, SaveIcon as SaveIconLucide, Trash2Icon } from 'lucide-react';
+import { CheckIcon, PencilIcon, PlusIcon, RefreshCwIcon, SaveIcon as SaveIconLucide, Trash2Icon } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 export const LinkCreate = (props) => {
@@ -28,12 +28,14 @@ export const LinkAssign = (props) => {
     </Link>
 }
 
-export const LinkIconCreate = props => {
+export const LinkIconCreate = ({ name, ...props }) => {
     return (
         <Link
             {...props}
+            className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
         >
-            <CirclePlus size={16} />
+            <PlusIcon size={16} />
+            {name}
         </Link>
     )
 }

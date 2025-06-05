@@ -7,10 +7,10 @@ import Table from '@/Components/UI/Tables';
 import Buttons from '@/Components/UI/Buttons';
 import Links from '@/Components/UI/Links';
 
-export default function SerialNumber({ serial_number }) {
+export default function SerialNumber({ serial_numbers }) {
     useEffect(() => {
-        console.log(serial_number);
-    }, [serial_number]);
+        console.log(serial_numbers);
+    }, [serial_numbers]);
 
     return (
         <InventoryLayout
@@ -20,7 +20,7 @@ export default function SerialNumber({ serial_number }) {
                         Serial Number
                     </h2>
                     <Link
-                        href={route('serial_number.create')}
+                        href={route('serials.create')}
                         className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
                     >
                         <PlusIcon size={16} />
@@ -30,7 +30,7 @@ export default function SerialNumber({ serial_number }) {
             }
         >
             <div className="px-4 py-6">
-                {serial_number.data.length > 0 ? (
+                {serial_numbers.data.length > 0 ? (
                     <div className="overflow-x-auto rounded-lg bg-white shadow">
                         <Table>
                             <Table.Head>
@@ -45,10 +45,10 @@ export default function SerialNumber({ serial_number }) {
                                 </Table.Row>
                             </Table.Head>
                             <Table.Body>
-                                {serial_number.data?.map((serial) => (
+                                {serial_numbers.data?.map((serial) => (
                                     <Table.Row key={serial.id}>
-                                        <Table.Td>{serial.batch_id}</Table.Td>
-                                        <Table.Td>{serial.product_variant_id}</Table.Td>
+                                        <Table.Td>{serial.batch.batch_number}</Table.Td>
+                                        <Table.Td>{serial.product_variant.product_sku}</Table.Td>
                                         <Table.Td>{serial.serial_number}</Table.Td>
                                         <Table.Td>{serial.status}</Table.Td>
                                         <Table.Td>{serial.quantity}</Table.Td>
@@ -86,7 +86,7 @@ export default function SerialNumber({ serial_number }) {
                         </Table>
                         <div className="p-4">
                             <Controller
-                                value={serial_number}
+                                value={serial_numbers}
                                 preserveScrollBool
                                 preserveStateBool
                             />

@@ -2,19 +2,29 @@
 
 namespace App\Http\Controllers\Inventory;
 
-use App\Http\Controllers\Controller;
+use App\Repositories\Inventory\Serials\SerialRepository;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Inventory\SerialNumbers;
 
 class SerialNumberController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+
+    protected $serialRepository;
+
+    public function __construct(SerialRepository $serialRepository)
+    {
+        $this->serialRepository = $serialRepository;
+    }
+
     public function index()
     {
         
         return inertia('Inventory/Serials/Page', [
-            
+            'serial_numbers' => $this->serialRepository->getAllSerialWithCustomJoins(10),
         ]);
     }
 

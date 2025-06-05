@@ -63,6 +63,11 @@ export default function InventoryLayout({ header, children }) {
             name: 'Batches',
             route: 'batches.index',
         },
+        {
+            id: '9',
+            name: 'Serials',
+            route: 'serials.index',
+        },
     ];
 
     const allowedRouteNames = allowedRoutes.map((routeObj) => routeObj.route_name);

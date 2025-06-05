@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Analytics\Sales\SalesAnalyticsController;
+use App\Http\Controllers\Inventory\SerialNumberController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -104,7 +105,7 @@ Route::middleware(['auth', 'route.authorization'])->group(function () {
 
     Route::resource('/inventory/batches', BatchController::class);
 
-    Route::resource('/inventory/batches', BatchController::class);
+    Route::resource('/inventory/serials', SerialNumberController::class);
 });
 
 Route::middleware(['auth', 'route.authorization'])->group(function () {

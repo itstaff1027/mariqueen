@@ -4,6 +4,8 @@ namespace App\Models\Inventory;
 
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Models\ProductVariant;
+use App\Models\Inventory\Batches;
 use Illuminate\Database\Eloquent\Model;
 
 class SerialNumbers extends Model
@@ -25,5 +27,13 @@ class SerialNumbers extends Model
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
+
+    public function batch(){
+        return $this->belongsTo(Batches::class, 'batch_id');
+    }
+
+    public function productVariant(){
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 }

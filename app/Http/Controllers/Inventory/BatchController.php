@@ -20,7 +20,7 @@ class BatchController extends Controller
 
     public function __construct(BatchRepository $batchRepository)
     {
-        return $this->batchRepository = $batchRepository;
+        $this->batchRepository = $batchRepository;
     }
 
     public function index()

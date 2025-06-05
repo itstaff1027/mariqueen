@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\Http\Requests\Inventory\StockTransactions\StoreStockTransactions;
 use App\Models\Warehouse;
 use App\Models\StockLevels;
 use Illuminate\Http\Request;
@@ -117,17 +118,9 @@ class StockTransactionController extends Controller
         return json_encode($stock_levels);
     }
 
-    public function store(Request $request)
+    public function store(StoreStockTransactions $request)
     {
-        $validated = $request->validate([
-            'transaction_type' => 'required|in:purchase,return,adjustment,correction,repair,transfer',
-            'remarks' => 'nullable|string|max:255',
-            'products' => 'required|array',
-            'products.*.product_variant_id' => 'required|exists:product_variants,id',
-            'products.*.quantity' => 'required|integer|min:1',
-            'from_warehouse_id' => 'nullable|exists:warehouses,id',
-            'to_warehouse_id' => 'required|exists:warehouses,id',
-        ]);
+        $validated = $request->validated();
     
         DB::transaction(function () use ($validated) {
             // ✅ 1️⃣ Insert into `stock_transactions`
@@ -282,8 +275,6 @@ class StockTransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Stock transaction processed successfully!');
     }
     
-    
-
     /**
      * Display the specified resource.
      */
@@ -390,13 +381,35 @@ class StockTransactionController extends Controller
     }
 
     public function update_status_to_approved(string $id){
-        $transaction = StockTransactions::findOrFail($id);
-        // dd($transaction);
+        DB::transaction(function () use ($id) {
 
-        $items = StockTransactionItems::where('stock_transaction_id', '=', $id)->get();
-        // dd($items);
-        DB::transaction(function () use ($items, $transaction) {
+            $transaction = StockTransactions::findOrFail($id);
             $transaction->update(['status' => 'approved']);
+
+            $items = StockTransactionItems::where('stock_transaction_id', '=', $id)->get();
+
+            // $rowStockLevels = $items->map(fn($item) => [
+            //     'product_variant_id' => $item->product_variant_id,
+            //     'warehouse_id'       => $transaction['to_warehouse_id'],
+            //     'quantity'           => $item->quantity,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ])->toArray();
+            // // dd($rowStockLevels);
+            // StockLevels::insert($rowStockLevels);
+
+            // $rowStockMovements = $items->map(fn($item) => [
+            //     'product_variant_id' => $item->product_variant_id,
+            //     'from_warehouse_id' => $transaction['from_warehouse_id'],
+            //     'to_warehouse_id' => $transaction['to_warehouse_id'],
+            //     'movement_type' => $transaction['to_warehouse_id'],
+            //     'quantity' => $item->quantity, // Negative for outgoing stock
+            //     'remarks' => $transaction['remarks'],
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ])->toArray();
+            // StockMovements::insert($rowStockMovements);
+
             foreach ($items as $item) {
                 $productVariantId = $item['product_variant_id'];
                 $fromWarehouseId = $transaction['from_warehouse_id'];
@@ -528,15 +541,16 @@ class StockTransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Stock transaction updated successfully!');
     }
 
+    public function update_status_to_approved_transfer(){
+
+    }
+
     public function update_status_to_rejected(string $id){
         $transaction = StockTransactions::findOrFail($id);
 
         $transaction->update(['status' => 'rejected']);
         return redirect()->route('transactions.index')->with('success', 'Stock transaction updated successfully!');
     }
-
-    
-
 
     /**
      * Remove the specified resource from storage.
